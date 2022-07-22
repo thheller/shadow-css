@@ -84,7 +84,7 @@ In Clojure terms, everything is done via the provided `css` macro.
 (css ["@media (min-width: 1024px)" :px-8])
 
 ;; aliases are also allowed in the selector place for commonly used selectors
-(css :px-4 [:ui/lg :px-8])
+(css :px-4 [:lg :px-8])
 
 ;; if using an alias it must resolve to a string, otherwise yields an invalid style
 (css :px-4 [:px-8]) ;; invalid
@@ -93,7 +93,7 @@ In Clojure terms, everything is done via the provided `css` macro.
 (css
   :px-4
   ["&:hover" {:color "red"}]
-  [:ui/lg
+  [:lg
    :px-8
    ["&:hover" {:color "green"}]])
 ```

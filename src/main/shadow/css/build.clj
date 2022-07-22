@@ -28,6 +28,15 @@
    "ml-" [:margin-left]
    "mr-" [:margin-right]
 
+   ;; positions
+   "top-" [:top]
+   "right-" [:right]
+   "bottom-" [:bottom]
+   "left-" [:left]
+
+   "inset-x" [:left :right]
+   "inset-y" [:top :bottom]
+
    ;; width
    "w-" [:width]
    "max-w-" [:max-width]
@@ -76,67 +85,6 @@
         (.getContextClassLoader)
         (.getResources "shadow-css-index.edn")
         (enumeration-seq))))
-
-(defn start [config]
-  (-> {:config
-       config
-
-       :index-ref
-       (-> (index/create)
-           (load-indexes-from-classpath)
-           (atom))
-
-       :manifest-cache-dir
-       (doto (io/file ".shadow-cljs" "css")
-         (io/make-parents))
-
-       :aliases
-       (load-default-aliases)
-
-       ;; https://tailwindcss.com/docs/customizing-spacing#default-spacing-scale
-       :spacing
-       {0 "0"
-        0.5 "0.125rem"
-        1 "0.25rem"
-        1.5 "0.375rem"
-        2 "0.5rem"
-        2.5 "0.626rem"
-        3 "0.75rem"
-        3.5 "0.875rem"
-        4 "1rem"
-        5 "1.25rem"
-        6 "1.5rem"
-        7 "1.75rem"
-        8 "2rem"
-        9 "2.25rem"
-        10 "2.5rem"
-        11 "2.75rem"
-        12 "3rem"
-        13 "3.25rem"
-        14 "3.5rem"
-        15 "3.75rem"
-        16 "4rem"
-        17 "4.25rem"
-        18 "4.5rem"
-        19 "4.75rem"
-        20 "5rem"
-        24 "6rem"
-        28 "7rem"
-        32 "8rem"
-        36 "9rem"
-        40 "10rem"
-        44 "11rem"
-        48 "12rem"
-        52 "13rem"
-        56 "14rem"
-        60 "15rem"
-        64 "16rem"
-        96 "24rem"}
-
-       :normalize-src
-       (slurp (io/resource "shadow/css/modern-normalize.css"))}
-
-      (generate-default-aliases)))
 
 (defn build-css-for-chunk
   [{:keys [index-ref] :as svc} {:keys [include] :as entries}]
@@ -202,13 +150,16 @@
                 warning warnings]
             (assoc warning :ns ns :line line :column column)))]
 
+    ;; TODO: merge media queries so they are only emitted once and not per rule
+    ;; TODO: add optional optimization step to collapse classes
+    ;; TODO: css minifier
     (merge
       {:warnings warnings
        :classpath-includes cp-includes
        :rules all-rules}
       (comp/generate-css all-rules))))
 
-(defn generate [{:keys [normalize-src index-ref] :as svc} {:keys [output-dir chunks] :as build-config}]
+(defn generate [{:keys [preflight-src index-ref] :as svc} {:keys [output-dir chunks] :as build-config}]
   (let [output-dir (io/file output-dir)]
 
     ;; just to make sure output-dir exists
@@ -222,7 +173,7 @@
       (fn [results chunk-id chunk]
         (let [output-file (io/file output-dir (str (name chunk-id) ".css"))
               {:keys [css classpath-includes] :as output} (build-css-for-chunk svc chunk)
-              css (str normalize-src "\n"
+              css (str preflight-src "\n"
                        css "\n"
                        (->> classpath-includes
                             (map #(slurp (io/resource %)))
@@ -234,5 +185,74 @@
           ))
       []
       chunks)))
+
+(defn index-path [{:keys [index-ref] :as svc} path opts]
+  (swap! index-ref index/add-path path opts)
+  svc)
+
+(defn index-file [{:keys [index-ref] :as svc} file]
+  (swap! index-ref index/add-file file)
+  svc)
+
+(defn start [config]
+  (-> {:config
+       config
+
+       :index-ref
+       (-> (index/create)
+           (load-indexes-from-classpath)
+           (atom))
+
+       :manifest-cache-dir
+       (doto (io/file ".shadow-cljs" "css")
+         (io/make-parents))
+
+       :aliases
+       (load-default-aliases)
+
+       ;; https://tailwindcss.com/docs/customizing-spacing#default-spacing-scale
+       :spacing
+       {0 "0"
+        0.5 "0.125rem"
+        1 "0.25rem"
+        1.5 "0.375rem"
+        2 "0.5rem"
+        2.5 "0.626rem"
+        3 "0.75rem"
+        3.5 "0.875rem"
+        4 "1rem"
+        5 "1.25rem"
+        6 "1.5rem"
+        7 "1.75rem"
+        8 "2rem"
+        9 "2.25rem"
+        10 "2.5rem"
+        11 "2.75rem"
+        12 "3rem"
+        13 "3.25rem"
+        14 "3.5rem"
+        15 "3.75rem"
+        16 "4rem"
+        17 "4.25rem"
+        18 "4.5rem"
+        19 "4.75rem"
+        20 "5rem"
+        24 "6rem"
+        28 "7rem"
+        32 "8rem"
+        36 "9rem"
+        40 "10rem"
+        44 "11rem"
+        48 "12rem"
+        52 "13rem"
+        56 "14rem"
+        60 "15rem"
+        64 "16rem"
+        96 "24rem"}
+
+       :preflight-src
+       (slurp (io/resource "shadow/css/preflight.css"))}
+
+      (generate-default-aliases)))
 
 (defn stop [svc])

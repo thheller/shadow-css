@@ -12,7 +12,7 @@
   (get-in svc [:aliases alias-kw]))
 
 (def plain-numeric-props
-  #{:flex :order :flex-shrink :flex-grow})
+  #{:flex :order :flex-shrink :flex-grow :z-index})
 
 (defn convert-num-val [index prop num]
   (if (contains? plain-numeric-props prop)

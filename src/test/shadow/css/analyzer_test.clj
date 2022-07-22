@@ -1,12 +1,13 @@
 (ns shadow.css.analyzer-test
   (:require
+    [clojure.string :as str]
     [clojure.pprint :refer (pprint)]
+    [clojure.test :as ct :refer (deftest is)]
     [shadow.css.index :as index]
     [shadow.css.analyzer :as ana]
     [shadow.css.build :as build]
     [shadow.css.specs :as s]
-    [clojure.test :as ct :refer (deftest is)]
-    [clojure.string :as str]))
+    ))
 
 (deftest analyze-form
   (pprint
@@ -19,23 +20,29 @@
                 "pass"
                 :c-text-1
                 [:&hover :py-10]
-                [:>md :px-6
+                [:md+ :px-6
                  ["@media print" :px-2]]
-                [:>lg :px-8
+                [:lg+ :px-8
                  [:&hover :py-12]])})))
 
 
+;; TODO: CLI API for these?
+;; or just clojure API to be used from REPL/tools.build?
+
+;; library side index generation to be included in jar
 (deftest index-src-main
   (time
     (tap>
       (-> (index/create)
           (index/add-path "src/main" {})
-          (index/write-to "src/dev/shadow-css-index.edn")))))
+          (index/write-to "tmp/css/shadow-css-index.edn")))))
 
+;; project side to generate actual css
 (deftest build-src-main
   (time
     (tap>
       (-> (build/start {})
+          (build/index-path "src/main" {})
           (build/generate '{:output-dir "tmp/css"
                             :chunks {:main {:include [shadow.cljs.ui.*]}}})))))
 
@@ -61,9 +68,7 @@
 
 (deftest test-parse-tailwind
   (let [s
-        [:tbody {:class "align-baseline"} [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400"} "ring-0"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring-1"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring-2"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring-4"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring-8"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "box-shadow: var(--tw-ring-inset) 0 0 0 calc(8px + var(--tw-ring-offset-width)) var(--tw-ring-color);"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "ring-inset"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "--tw-ring-inset: inset;"]]]
-
-
+        nil
 
         rules (parse-tailwind s)]
     (doseq [rule (sort (keys rules))]

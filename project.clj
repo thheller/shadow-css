@@ -12,7 +12,8 @@
 
   :dependencies
   [[org.clojure/clojure "1.11.1" :scope "provided"]
-   [org.clojure/clojurescript "1.11.60" :scope "provided"]]
+   [org.clojure/clojurescript "1.11.60" :scope "provided"]
+   [org.clojure/tools.reader "1.3.6"]]
 
   :source-paths
   ["src/main"])

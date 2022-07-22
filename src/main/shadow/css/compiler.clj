@@ -33,9 +33,9 @@
   (emit-rule w sel rules)
 
   (doseq [[media-query rules] at-rules]
-    (emitln media-query "{")
+    (emitln w media-query "{")
     (emit-rule w sel rules)
-    (emitln "}")))
+    (emitln w "}")))
 
 (defn generate-css [defs]
   ;; FIXME: accept writer as arg?

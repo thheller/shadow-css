@@ -2,8 +2,7 @@
   (:require
     [shadow.css.analyzer :as ana]
     [clojure.string :as str]
-    [clojure.java.io :as io]
-    [shadow.core-ext :as core-ext])
+    [clojure.java.io :as io])
   (:import [java.io File]))
 
 (defn add-source [idx src]
@@ -33,11 +32,21 @@
 
     (reduce add-file idx files)))
 
+(defn safe-pr-str
+  "cider globally sets *print-length* for the nrepl-session which messes with pr-str when used to print cache or other files"
+  [x]
+  (binding [*print-length* nil
+            *print-level* nil
+            *print-namespace-maps* nil
+            *print-meta* nil]
+    (pr-str x)
+    ))
+
 (defn write-to [idx output-to]
   (spit
     (doto (io/file output-to)
       (io/make-parents))
-    (core-ext/safe-pr-str idx))
+    (safe-pr-str idx))
   idx)
 
 (defn create []
