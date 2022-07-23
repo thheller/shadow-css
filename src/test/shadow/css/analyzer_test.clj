@@ -43,8 +43,8 @@
     (tap>
       (-> (build/start {})
           (build/index-path "src/main" {})
-          (build/generate '{:output-dir "tmp/css"
-                            :chunks {:main {:include [shadow.cljs.ui.*]}}})))))
+          #_(build/generate '{:output-dir "tmp/css"
+                              :chunks {:main {:include [shadow.cljs.ui.*]}}})))))
 
 (defn parse-tailwind [[tbody tbody-attrs & rows]]
   (reduce

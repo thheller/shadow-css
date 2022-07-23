@@ -53,7 +53,7 @@
    "gap-x-" [:column-gap]
    "gap-y-" [:row-gap]})
 
-(defn generate-default-aliases [{:keys [spacing] :as svc}]
+(defn generate-spacing-aliases [{:keys [spacing] :as svc}]
   (update svc :aliases
     (fn [aliases]
       (reduce-kv
@@ -70,6 +70,31 @@
 
 (defn load-default-aliases []
   (edn/read-string (slurp (io/resource "shadow/css/aliases.edn"))))
+
+(def color-alias-groups
+  {"bg-" [:background-color]
+   "border-" [:border-color]
+   "outline-" [:outline-color]
+   "text-" [:color]})
+
+(defn generate-color-aliases* [aliases]
+  (let [colors (edn/read-string (slurp (io/resource "shadow/css/colors.edn")))]
+    (reduce
+      (fn [aliases [color-name shade color]]
+        (reduce-kv
+          (fn [aliases alias-prefix props]
+            (assoc aliases
+              (keyword (str alias-prefix color-name (when (seq shade) (str "-" shade))))
+              (reduce #(assoc %1 %2 color) {} props)))
+          aliases
+          color-alias-groups))
+      aliases
+      (for [[name vals] colors
+            [shade color] vals]
+        [name shade color]))))
+
+(defn generate-color-aliases [svc]
+  (update svc :aliases generate-color-aliases*))
 
 (defn load-indexes-from-classpath [index]
   (reduce
@@ -253,6 +278,7 @@
        :preflight-src
        (slurp (io/resource "shadow/css/preflight.css"))}
 
-      (generate-default-aliases)))
+      (generate-color-aliases)
+      (generate-spacing-aliases)))
 
 (defn stop [svc])
