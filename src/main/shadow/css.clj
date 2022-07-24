@@ -61,7 +61,10 @@
         `(get-class ~css-id))
       (if (seq passthrough)
         `(~'js* "(~{} + shadow.css.sel(~{}))" ~(str passthrough " ") ~css-id)
-        `(~'js* "(shadow.css.sel(~{}))" ~css-id)))))
+        (with-meta
+          `(~'js* "(shadow.css.sel(~{}))" ~css-id)
+          (assoc (meta &form) :tag 'shadow.css/css-id)
+          )))))
 
 (comment
 

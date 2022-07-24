@@ -196,6 +196,8 @@ Prior with tailwind the generated CSS was GZIP 6.0KB (normal 23.4KB) including a
 
 The totally not-optimized-or-minified-still-includes-comments CSS from shadow.css gets up to GZIP 8.2 KB (normal 44.1 KB). So not at all bad. GZIP shines here, so the long classnames really don't seem to matter all that much. I expect that optimizations and duplicate removal will bring this at least to tailwind level, potentially smaller.
 
+Running the generated CSS through an online CSS minifier shrinks everything to GZIP 5.4KB (normal 26.9 KB), which is then already smaller than Tailwind without even trying to minify classnames, removing duplicates or emitting all media-query'd rules grouped. Seems very promising.
+
 ## Build Tooling
 
 Build tooling is rough, but I get warnings for undefined aliases and noticed that the code I had ported had some classes that aren't defined in tailwind and did nothing. Tailwind never warned me about those.
