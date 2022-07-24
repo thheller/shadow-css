@@ -357,7 +357,7 @@
  ;; height, rest auto-generated
  :w-auto {:width "auto"}
  :w-full {:width "100%"}
- :w-screen {:width "100vh"}
+ :w-screen {:width "100vw"}
  :w-min {:width "min-content"}
  :w-max {:width "max-content"}
  :w-fit {:width "fit-content"}
