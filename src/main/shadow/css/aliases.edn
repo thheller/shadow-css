@@ -42,7 +42,7 @@
  :cv-1 "#f5f5f5" ;; "var(--color-primary)"
  :cv-1l "#fff" ;; "var(--color-primary-light)"
  :cv-1d "#c2c2c2" ;; "var(--color-primary-dark)"
- 
+
  :cv-contrast-1 "#000" ;; "var(--color-contrast-primary)"
  :cv-contrast-1l "#000" ;; "var(--color-contrast-primary-light)"
  :cv-contrast-1d "#000" ;; "var(--color-contrast-primary-dark)"
@@ -99,6 +99,23 @@
  :block {:display "block"}
  :hidden {:display "none"}
  :inline-block {:display "inline-block"}
+ :inline-flex {:display "inline-flex"}
+ :grid {:display "grid"}
+ :inline-grid {:display "inline-grid"}
+
+ :grid-cols-1 {:grid-template-columns "repeat(1, minmax(0, 1fr))"}
+ :grid-cols-10 {:grid-template-columns "repeat(10, minmax(0, 1fr))"}
+ :grid-cols-11 {:grid-template-columns "repeat(11, minmax(0, 1fr))"}
+ :grid-cols-12 {:grid-template-columns "repeat(12, minmax(0, 1fr))"}
+ :grid-cols-2 {:grid-template-columns "repeat(2, minmax(0, 1fr))"}
+ :grid-cols-3 {:grid-template-columns "repeat(3, minmax(0, 1fr))"}
+ :grid-cols-4 {:grid-template-columns "repeat(4, minmax(0, 1fr))"}
+ :grid-cols-5 {:grid-template-columns "repeat(5, minmax(0, 1fr))"}
+ :grid-cols-6 {:grid-template-columns "repeat(6, minmax(0, 1fr))"}
+ :grid-cols-7 {:grid-template-columns "repeat(7, minmax(0, 1fr))"}
+ :grid-cols-8 {:grid-template-columns "repeat(8, minmax(0, 1fr))"}
+ :grid-cols-9 {:grid-template-columns "repeat(9, minmax(0, 1fr))"}
+ :grid-cols-none {:grid-template-columns "none"}
 
  ;; margin
  :m-auto {:margin "auto"}
@@ -130,6 +147,47 @@
  :flex-wrap-reverse {:flex-wrap "wrap-reverse"}
  :flex-nowrap {:flex-wrap "nowrap"}
 
+
+ ;; flex align-items
+ :items-baseline {:align-items "baseline"}
+ :items-center {:align-items "center"}
+ :items-end {:align-items "flex-end"}
+ :items-start {:align-items "flex-start"}
+ :items-stretch {:align-items "stretch"}
+
+ :justify-items-center {:justify-items "center"}
+ :justify-items-end {:justify-items "end"}
+ :justify-items-start {:justify-items "start"}
+ :justify-items-stretch {:justify-items "stretch"}
+
+ :justify-self-auto {:justify-self "auto"}
+ :justify-self-center {:justify-self "center"}
+ :justify-self-end {:justify-self "end"}
+ :justify-self-start {:justify-self "start"}
+ :justify-self-stretch {:justify-self "stretch"}
+
+ :justify-around {:justify-content "space-around"}
+ :justify-between {:justify-content "space-between"}
+ :justify-center {:justify-content "center"}
+ :justify-end {:justify-content "flex-end"}
+ :justify-evenly {:justify-content "space-evenly"}
+ :justify-start {:justify-content "flex-start"}
+
+ :align-baseline {:vertical-align "baseline"}
+ :align-bottom {:vertical-align "bottom"}
+ :align-middle {:vertical-align "middle"}
+ :align-sub {:vertical-align "sub"}
+ :align-super {:vertical-align "super"}
+ :align-text-bottom {:vertical-align "text-bottom"}
+ :align-text-top {:vertical-align "text-top"}
+ :align-top {:vertical-align "top"}
+
+ :whitespace-normal {:white-space "normal"}
+ :whitespace-nowrap {:white-space "nowrap"}
+ :whitespace-pre {:white-space "pre"}
+ :whitespace-pre-line {:white-space "pre-line"}
+ :whitespace-pre-wrap {:white-space "pre-wrap"}
+
  ;; font weight
  :font-thin {:font-weight "100"}
  :font-extralight {:font-weight "200"}
@@ -141,12 +199,37 @@
  :font-extrabold {:font-weight "800"}
  :font-black {:font-weight "900"}
 
- ;; flex align-items
- :items-baseline {:align-items "baseline"}
- :items-center {:align-items "center"}
- :items-end {:align-items "flex-end"}
- :items-start {:align-items "flex-start"}
- :items-stretch {:align-items "stretch"}
+ ;; font
+ :font-sans {:font-family "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""}
+ :font-serif {:font-family "ui-serif, Georgia, Cambria, \"Times New Roman\", Times, serif"}
+ :font-mono {:font-family "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"}
+
+ :leading-10 {:line-height "2.5rem"}
+ :leading-3 {:line-height ".75rem"}
+ :leading-4 {:line-height "1rem"}
+ :leading-5 {:line-height "1.25rem"}
+ :leading-6 {:line-height "1.5rem"}
+ :leading-7 {:line-height "1.75rem"}
+ :leading-8 {:line-height "2rem"}
+ :leading-9 {:line-height "2.25rem"}
+ :leading-loose {:line-height "2"}
+ :leading-none {:line-height "1"}
+ :leading-normal {:line-height "1.5"}
+ :leading-relaxed {:line-height "1.625"}
+ :leading-snug {:line-height "1.375"}
+ :leading-tight {:line-height "1.25"}
+
+ :tracking-normal {:letter-spacing "0em"}
+ :tracking-tight {:letter-spacing "-0.025em"}
+ :tracking-tighter {:letter-spacing "-0.05em"}
+ :tracking-wide {:letter-spacing "0.025em"}
+ :tracking-wider {:letter-spacing "0.05em"}
+ :tracking-widest {:letter-spacing "0.1em"}
+
+ :capitalize {:text-transform "capitalize"}
+ :lowercase {:text-transform "lowercase"}
+ :normal-case {:text-transform "none"}
+ :uppercase {:text-transform "uppercase"}
 
  ;; font size
  :text-xs {:font-size "0.75rem" :line-height "1rem"}

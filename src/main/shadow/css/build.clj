@@ -51,7 +51,11 @@
    ;; grid
    "gap-" [:gap]
    "gap-x-" [:column-gap]
-   "gap-y-" [:row-gap]})
+   "gap-y-" [:row-gap]
+
+   ["space-x-" "& > * + *"] [:padding-left :padding-right]
+   ["space-y-" "& > * + *"] [:padding-top :padding-bottom]
+   })
 
 (defn generate-spacing-aliases [{:keys [spacing] :as svc}]
   (update svc :aliases
@@ -60,9 +64,11 @@
         (fn [aliases space-num space-val]
           (reduce-kv
             (fn [aliases prefix props]
-              (assoc aliases
-                (keyword (str prefix space-num))
-                (reduce #(assoc %1 %2 space-val) {} props)))
+              (if (string? prefix)
+                (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 space-val) {} props))
+                (let [[prefix sub-sel] prefix]
+                  (assoc aliases (keyword (str prefix space-num)) [[sub-sel (reduce #(assoc %1 %2 space-val) {} props)]])
+                  )))
             aliases
             spacing-alias-groups))
         aliases
@@ -80,18 +86,18 @@
 (defn generate-color-aliases* [aliases]
   (let [colors (edn/read-string (slurp (io/resource "shadow/css/colors.edn")))]
     (reduce
-      (fn [aliases [color-name shade color]]
+      (fn [aliases [color-name suffix color]]
         (reduce-kv
           (fn [aliases alias-prefix props]
             (assoc aliases
-              (keyword (str alias-prefix color-name (when (seq shade) (str "-" shade))))
+              (keyword (str alias-prefix color-name suffix))
               (reduce #(assoc %1 %2 color) {} props)))
           aliases
           color-alias-groups))
       aliases
       (for [[name vals] colors
-            [shade color] vals]
-        [name shade color]))))
+            [suffix color] vals]
+        [name suffix color]))))
 
 (defn generate-color-aliases [svc]
   (update svc :aliases generate-color-aliases*))

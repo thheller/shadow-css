@@ -175,6 +175,74 @@ Testing should also be done if shortening is even necessary. GZIP is very good a
 
 Might be useful to let use supply a list of prefixes that should be stripped. So instead of `shadow_cljs_ui_components_common_LxCx` you get `common_LxCx` with the rest stripped?
 
-# Build
 
-# Usage
+# Observations
+
+Observations made while porting the shadow-cljs UI from tailwind to purely shadow.css.
+
+Sometimes becomes verbose
+```clojure
+[:div.px-2]
+[:div {:class "px-2"}]
+;; becomes
+[:div {:class (css :px-2)}]
+```
+
+Not bad compared to the `:class` variant which I prefer, so not a big deal overall. Could be alleviated by making the "indexer" extensible and able to collect other forms. As long as the picked id matches the id the macro will generate any form can be collected.
+
+## CSS Size
+
+Prior with tailwind the generated CSS was GZIP 6.0KB (normal 23.4KB) including all the minification tailwind does.
+
+The totally not-optimized-or-minified-still-includes-comments CSS from shadow.css gets up to GZIP 8.2 KB (normal 44.1 KB). So not at all bad. GZIP shines here, so the long classnames really don't seem to matter all that much. I expect that optimizations and duplicate removal will bring this at least to tailwind level, potentially smaller.
+
+## Build Tooling
+
+Build tooling is rough, but I get warnings for undefined aliases and noticed that the code I had ported had some classes that aren't defined in tailwind and did nothing. Tailwind never warned me about those.
+
+### Includes are nice
+
+```clojure
+(ns shadow.cljs.ui.components.code-editor
+  {:shadow.css/include ["shadow/cljs/ui/components/code-editor.css"]}
+  ...)
+```
+So, when this namespace is included in the build it just includes this resource in the generated CSS as well. Similar to what webpack `require("./some.css")` does I guess. In the above case this is including all the CodeMirror related styles which is nice since those are not portable to `shadow.css`.
+
+They also provide a way to add CSS that `shadow.css` might not be capable of generating yet.
+
+## Flexibility
+
+Loving the flexibility of just defining stuff on the fly and not being constrained to be something tailwind can recognize. No need for `w-[30px]` typeof classes when you can just `{:width "30px"}` in the `css` definition.
+
+Having full access to CSS also means more freedom. Not fully taking advantage of that yet since I just wanted to port the code over simply without having to worry about styling for now. Yet, I already feel like I can do more than before without having to jump to actual CSS files.
+
+## Getting more Clojurey
+
+I think I like a new naming pattern of using `$whatever` names for css classes. So that the `$` differentiates them from other local names.
+
+```clojure
+(let [$row (css ...)
+      $key (css ...)
+      $val (css ...)]
+
+  (<< [:div {:class $row}
+       [:div {:class $key} key]
+       [:div {:class $val} val]]))
+
+;; could extend the fragment macro magic to make things shorter again
+
+(let [$row (css ...)
+      $key (css ...)
+      $val (css ...)]
+
+  (<< [:div$row
+       [:div$key key]
+       [:div$val val]]))
+```
+
+Downside to this is that tools (eg. Cursive) don't recognize this, so it shows all the `$` locals as unused which is not ideal. Maybe tools could be taught that in some way?
+
+Using a new `$` prefix since `#` or `.` wouldn't be valid clojure, and we also still want those available so `:div$local#app.class` is valid.
+
+Introducing local names that way certainly beats having to come up with global names such as `defstyled` did. Local names actually makes things more readable and usable, making the intent of elements clearer. Of course that could have been done before with just `(let [$row "..."])`, `(def $thing ...)` of course also works, sometimes global names are desirable.
