@@ -248,3 +248,55 @@ Downside to this is that tools (eg. Cursive) don't recognize this, so it shows a
 Using a new `$` prefix since `#` or `.` wouldn't be valid clojure, and we also still want those available so `:div$local#app.class` is valid.
 
 Introducing local names that way certainly beats having to come up with global names such as `defstyled` did. Local names actually makes things more readable and usable, making the intent of elements clearer. Of course that could have been done before with just `(let [$row "..."])`, `(def $thing ...)` of course also works, sometimes global names are desirable.
+
+
+# On Extensibility
+
+Based on the rough draft of this document a few people have expressed concerns over the non-REPL friendliness and static analysis of `(css ...)` forms. After thinking about this for a while I believe this is an absolute none issue.
+
+The tooling currently creates an "index" of namespaces and the css forms it contains. It currently is collected by a simple analysis pass that parses CLJ(S) source files and looks for `(css ...)` forms. That index can either be used directly in the build process or it can be stored in a EDN file to be shipped as part of a library for example. Currently, this would be a `shadow-css-index.edn` file at the classpath root, added to the published `.jar`. This is then read at build time and added to the build index.
+
+## Index is just Data
+
+The index is just a CLJ map of `{ns-sym ns-info}`. `ns-info` is another map of roughly this structure
+
+```clojure
+{:ns shadow.cljs.ui.components.inspect,
+ :ns-meta {}, ;; for :shadow.css/include etc
+ :requires [] ;; not collected yet, just the :require namespaces in order
+ :css
+ [{:line 46,
+   :column 27,
+   :end-line 46,
+   :end-column 74,
+   :form (css :w-full :h-full :font-mono :border-t :p-4)}
+  {:line 50,
+   :column 27,
+   :end-line 50,
+   :end-column 74,
+   :form (css :w-full :h-full :font-mono :border-t :p-4)}]}
+```
+
+So, each `(css ...)` form is just collected and stored in the index with the relevant metadata. The current tooling will generate the classname to use from the `:ns` `:line` `:column` by default, it could just use a `:class` string if already provided instead.
+
+## Index + Config then make CSS
+
+Only the index data and some configuration is then used to construct the actual CSS needed. The idea is that the build config specifies which namespaces should be included. It could supply custom aliases or override predefined ones.
+
+I haven't figured out how to do the tooling part yet. So, this is all very rough. For development of the shadow-cljs UI I created this [bit of helper code](https://github.com/thheller/shadow-cljs/blob/7b95c2642b80d249d2ecec04587d64e4419ddc88/src/dev/repl.clj#L43-L64) that just runs as part of my normal REPL workflow. It watches my `src/main` and updates each namespace in the index when the file is modified. To make a "proper" file I run [this](https://github.com/thheller/shadow-cljs/blob/7b95c2642b80d249d2ecec04587d64e4419ddc88/src/dev/build.clj#L5-L21).
+
+Not a great build API but works for now.
+
+## Indexing is customizable
+
+All this really needs then is an extensible index generation mechanism. Instead of the regular `index-file` or `index-path` functions you could call your own. All you have to do is `update` a CLJ map, which is simple.
+
+You don't even have to use the `shadow.css/css` macro at all. If you can provide data for the index you are good to go.
+
+Maybe `shadow.css` then just becomes sort of a standard way to express CSS-in-CLJ.
+
+### Don't forget about includes
+
+The index can also include the `:ns-meta {:shadow.css/include ["already/generated.css"]}` directive, which is currently collected from the actual `ns` metadata. If you generate the index yourself you can supply that from wherever.
+
+So, there already is a way to have pre-generated CSS and still have it participate in the overall CSS building by `shadow.css.build`.
