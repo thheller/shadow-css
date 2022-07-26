@@ -3,16 +3,15 @@
     [clojure.string :as str]
     [clojure.pprint :refer (pprint)]
     [clojure.test :as ct :refer (deftest is)]
-    [shadow.css.index :as index]
     [shadow.css.analyzer :as ana]
     [shadow.css.build :as build]
     [shadow.css.specs :as s]
-    ))
+    [clojure.java.io :as io]))
 
 (deftest analyze-form
   (pprint
     (ana/process-form
-      (build/start {})
+      (build/start)
       {:ns 'foo.bar
        :line 1
        :column 2
@@ -33,18 +32,16 @@
 (deftest index-src-main
   (time
     (tap>
-      (-> (index/create)
-          (index/add-path "src/main" {})
-          (index/write-to "tmp/css/shadow-css-index.edn")))))
+      (-> (build/start)
+          (build/index-path (io/file "src" "main") {})))))
 
 ;; project side to generate actual css
 (deftest build-src-main
   (time
     (tap>
-      (-> (build/start {})
+      (-> (build/start)
           (build/index-path "src/main" {})
-          #_(build/generate '{:output-dir "tmp/css"
-                              :chunks {:main {:include [shadow.cljs.ui.*]}}})))))
+          #_(build/generate '{:main {:include [shadow.cljs.ui.*]}})))))
 
 (defn parse-tailwind [[tbody tbody-attrs & rows]]
   (reduce
@@ -68,9 +65,46 @@
 
 (deftest test-parse-tailwind
   (let [s
-        [:tbody {:class "align-baseline"} [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400"} "tracking-tighter"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300"} "letter-spacing: -0.05em;"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "tracking-tight"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "letter-spacing: -0.025em;"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "tracking-normal"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "letter-spacing: 0em;"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "tracking-wide"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "letter-spacing: 0.025em;"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "tracking-wider"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "letter-spacing: 0.05em;"]] [:tr [:td {:translate "no" :class "py-2 pr-2 font-mono font-medium text-xs leading-6 text-sky-500 whitespace-nowrap dark:text-sky-400 border-t border-slate-100 dark:border-slate-400/10"} "tracking-widest"] [:td {:translate "no" :class "py-2 pl-2 font-mono text-xs leading-6 text-indigo-600 whitespace-pre dark:text-indigo-300 border-t border-slate-100 dark:border-slate-400/10"} "letter-spacing: 0.1em;"]]]
+        nil
 
         rules (parse-tailwind s)]
     (doseq [rule (sort (keys rules))]
       (println (str rule " " (pr-str (get rules rule))))
       )))
+
+(deftest test-parse-ns
+  (let [state
+        {:requires []
+         :require-aliases {}
+         :refers {}}
+
+        form
+        '(ns ^{:foo "bar"} foo.bar
+           {:bar "foo"}
+           (:require
+             just-a-sym
+             [shadow.grove :refer (css << defc)]
+             [shadow.css :rename {css c}]
+             [just-another-sym]
+             [some.thing :as x]
+             [some.other-thing :refer (x)]
+             [not.loading :as-alias foo]
+             ["js-require" :as npm]
+             ["js-require-blank"]
+             ;; FIXME: not even sure this is valid, prefix lists are terrible
+             [bad.prefix list]
+             [terrible.prefix
+              [list
+               [nested :as n]
+               :as y]
+              :as z]))]
+
+    (pprint (ana/parse-ns state form))
+    ))
+
+
+(deftest test-parse-finds-namespaced-keywords
+  (let [result (ana/find-css-in-source "(ns what (:require [thing :as x])) (css ::x/foo ::baz)")]
+
+    (pprint result)
+    ))
