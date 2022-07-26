@@ -269,12 +269,12 @@ The index is just a CLJ map of `{ns-sym ns-info}`. `ns-info` is another map of r
    :column 27,
    :end-line 46,
    :end-column 74,
-   :form (css :w-full :h-full :font-mono :border-t :p-4)}
+   :form [:w-full :h-full :font-mono :border-t :p-4]}
   {:line 50,
    :column 27,
    :end-line 50,
    :end-column 74,
-   :form (css :w-full :h-full :font-mono :border-t :p-4)}]}
+   :form [:w-full :h-full :font-mono :border-t :p-4]}]}
 ```
 
 So, each `(css ...)` form is just collected and stored in the index with the relevant metadata. The current tooling will generate the classname to use from the `:ns` `:line` `:column` by default, it could just use a `:class` string if already provided instead.
@@ -283,7 +283,7 @@ So, each `(css ...)` form is just collected and stored in the index with the rel
 
 Only the index data and some configuration is then used to construct the actual CSS needed. The idea is that the build config specifies which namespaces should be included. It could supply custom aliases or override predefined ones.
 
-I haven't figured out how to do the tooling part yet. So, this is all very rough. For development of the shadow-cljs UI I created this [bit of helper code](https://github.com/thheller/shadow-cljs/blob/7b95c2642b80d249d2ecec04587d64e4419ddc88/src/dev/repl.clj#L43-L64) that just runs as part of my normal REPL workflow. It watches my `src/main` and updates each namespace in the index when the file is modified. To make a "proper" file I run [this](https://github.com/thheller/shadow-cljs/blob/7b95c2642b80d249d2ecec04587d64e4419ddc88/src/dev/build.clj#L5-L21).
+I haven't figured out how to do the tooling part yet. So, this is all very rough. For development of the shadow-cljs UI I created this [bit of helper code](https://github.com/thheller/shadow-cljs/blob/4115a2be68160b02e88a70409000f696008663e8/src/dev/repl.clj#L39-L60) that just runs as part of my normal REPL workflow. It watches my `src/main` and updates each namespace in the index when the file is modified. To make a "proper" file I run [this](https://github.com/thheller/shadow-cljs/blob/4115a2be68160b02e88a70409000f696008663e8/src/dev/build.clj#L6-L22).
 
 Not a great build API but works for now.
 
