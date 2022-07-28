@@ -1,4 +1,4 @@
-(defproject com.thheller/shadow-css "0.2.0"
+(defproject com.thheller/shadow-css "0.3.0"
   :description "FIXME: write description"
   :url "https://github.com/thheller/shadow-css"
 
