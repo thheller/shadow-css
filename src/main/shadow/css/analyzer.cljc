@@ -15,7 +15,7 @@
   (get-in svc [:aliases alias-kw]))
 
 (def plain-numeric-props
-  #{:flex :order :flex-shrink :flex-grow :z-index})
+  #{:flex :order :flex-shrink :flex-grow :z-index :opacity})
 
 (defn convert-num-val [index prop num]
   (if (contains? plain-numeric-props prop)
