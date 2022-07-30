@@ -7,6 +7,6 @@
 ;; this will be replaced with id generator values once classname minification/replacement is done
 ;; and the call is removed entirely by :advanced
 (defn sel
-  {:jsdoc ["@idGenerator {mapped}"]}
+  ;; {:jsdoc ["@idGenerator {mapped}"]}
   [id]
   id)
