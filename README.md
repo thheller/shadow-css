@@ -260,9 +260,9 @@ The above works totally fine but is a bit manual. During development I prefer to
 
 Currently, the `shadow.css.build` namespace has nothing to provide this. But you can use any file watcher you want to get the basic thing going.
 
-I use this basic construct to integrate the CSS building into my regular REPL workflow.
+I use this basic construct to integrate the CSS building into my regular REPL workflow. This is using the `fs-watch` utility provided by `shadow-cljs`, but any file watcher will do.
 
-```
+```clojure
 (ns repl
   (:require
     [clojure.java.io :as io]
@@ -331,11 +331,11 @@ I use this basic construct to integrate the CSS building into my regular REPL wo
 
 In the REPL I can run `(repl/start)` to start the automatic building and `(repl/stop)` to stop it. If you are used to the common CLJ REPL workflow setups this should fit right in.
 
-Since I also run `shadow-cljs` I usually start my work by running `npx shadow-cljs run repl/start`. That'll start `shadow-cljs` and start the CSS building. You could start CLJS builds from the `start` function too, I just do this via the shadow-cljs UI.
+Since I also run `shadow-cljs` I usually start my work by running `npx shadow-cljs run repl/start`. That'll start `shadow-cljs` and CSS building starts with it. You could start CLJS builds from the `start` function too, I just do that via the shadow-cljs UI.
 
-Note that all of this could just call `(build/css-release)`. It absolutely does not need to do all of this extra stuff, but it is a bit faster since it does less on each file change.
+Note that all of this could just call `(build/css-release)`. It absolutely does not need to do all of this extra stuff, but it is a bit faster since it does less on each file change. Creating the initial build state and indexing all files is more expensive than just incrementally updating changed namespaces.
 
-For the interested the build state is just a map, you can modify it however you like. Adding or overriding an alias is just `(assoc-in build-state [:aliases :px-4] {:color "green"})`.
+For the interested the build state is just a map, you can modify it however you like. Adding or overriding an alias is just `(assoc-in build-state [:aliases :px-4] {:color "green"})`. Feel free to explore, eg. via `tap>` in the shadow-cljs Inspect UI.
 
 # There Is One Problem Though
 
