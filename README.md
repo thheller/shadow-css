@@ -12,6 +12,8 @@ The build side however is very early and very alpha. I expect things to change a
 
 If you want to see actual projects using this you may look at the [shadow-cljs UI](https://github.com/thheller/shadow-cljs/tree/master/src/main/shadow/cljs/ui) sources. Just search for `(css`.
 
+You can also see this live in action directly in your browser via the [shadow-grove Playground](https://code.thheller.com/shadow-grove-playground/0.3.0/).
+
 ## Rationale
 
 Writing and maintaining CSS is a burden. Editing CSS in actual `.css` files means you have to come up with names for everything so the HTML can actually reference the styles. Coming up with the names in the first place is hard, and maintaining them over time is even harder. Many naming conventions (eg. [BEM](http://getbem.com/)) exist, which helps shrink the problem but does not eliminate it. Writing actual CSS also requires constantly context switching since the syntax is much different from Clojure.
