@@ -145,7 +145,7 @@ Media Queries are just passed through and the emitted CSS rules are grouped acco
 ```clojure
 (css :px-4 ["@media (min-width: 1024px)" :px-8])
 ;; or using predefined alias
-(css :px-4 [:md :px-8])
+(css :px-4 [:lg :px-8])
 ```
 
 Writing those repeatedly would get annoying, so the default [tailwind responsive breakpoints](https://tailwindcss.com/docs/responsive-design) are provided as aliases by default. Which of course can be overridden or extended via custom aliases.
