@@ -258,9 +258,7 @@ You may run this from the REPL, `lein run -m build/css-release`, `shadow-cljs ru
 
 The above works totally fine but is a bit manual. During development I prefer to just have something watching my source files and automatically rebuilding my CSS on change. This coupled with the hot-reload for CSS provided by `shadow-cljs`  (or `figwheel`) makes for a very nice workflow.
 
-Currently, the `shadow.css.build` namespace has nothing to provide this. But you can use any file watcher you want to get the basic thing going.
-
-I use this basic construct to integrate the CSS building into my regular REPL workflow. This is using the `fs-watch` utility provided by `shadow-cljs`, but any file watcher will do.
+Currently, the `shadow.css.build` namespace has nothing to provide this. I use this basic construct to integrate the CSS building into my regular REPL workflow. This is using the `fs-watch` utility provided by `shadow-cljs`, but any file watcher will do.
 
 ```clojure
 (ns repl
