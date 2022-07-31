@@ -1,5 +1,5 @@
 (defproject com.thheller/shadow-css "0.3.0"
-  :description "FIXME: write description"
+  :description "CSS-in-CLJ(S)"
   :url "https://github.com/thheller/shadow-css"
 
   :license
