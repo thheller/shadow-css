@@ -29,6 +29,11 @@
 ;; or just clojure API to be used from REPL/tools.build?
 
 ;; library side index generation to be included in jar
+(deftest build-start
+  (time
+    (tap>
+      (build/start))))
+
 (deftest index-src-main
   (time
     (tap>
@@ -66,6 +71,8 @@
 (deftest test-parse-tailwind
   (let [s
         nil
+
+
 
         rules (parse-tailwind s)]
     (doseq [rule (sort (keys rules))]

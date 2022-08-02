@@ -18,6 +18,19 @@
 
  :&hover "&:hover"
  :hover "&:hover"
+ :focus "&:focus"
+ :focus-within "&:focus-within"
+ :focus-visible "&:focus-visible"
+ :active "&:active"
+ :visited "&:visited"
+ :disabled "&:disabled"
+ :checked "&:checked"
+ :target "&:target"
+ :first "&:first-child"
+ :last "&:last-child"
+ :only "&:only-child"
+ :odd "&:nth-child(odd)"
+ :even "&:nth-child(even)"
 
  ;; color naming scheme based on
  ;; https://material.io/design/color/the-color-system.html#color-usage-and-palettes
@@ -149,12 +162,26 @@
  :flex-nowrap {:flex-wrap "nowrap"}
 
 
+ :flex-shrink {:flex-shrink "1"}
+ :flex-shrink-0 {:flex-shrink "0"}
+ :shrink {:flex-shrink "1"}
+ :shrink-0 {:flex-shrink "0"}
+
+
+
  ;; flex align-items
  :items-baseline {:align-items "baseline"}
  :items-center {:align-items "center"}
  :items-end {:align-items "flex-end"}
  :items-start {:align-items "flex-start"}
  :items-stretch {:align-items "stretch"}
+
+ :self-auto {:align-self "auto"}
+ :self-baseline {:align-self "baseline"}
+ :self-center {:align-self "center"}
+ :self-end {:align-self "flex-end"}
+ :self-start {:align-self "flex-start"}
+ :self-stretch {:align-self "stretch"}
 
  :justify-items-center {:justify-items "center"}
  :justify-items-end {:justify-items "end"}
@@ -515,5 +542,25 @@
  :rounded-tr-sm {:border-top-right-radius "0.125rem"}
  :rounded-tr-xl {:border-top-right-radius "0.75rem"}
  :rounded-xl {:border-radius "0.75rem"}
+
+ :not-sr-only {:position "static", :width "auto", :height "auto", :padding "0", :margin "0", :overflow "visible", :clip "auto", :white-space "normal"}
+ :sr-only {:clip "rect(0, 0, 0, 0)", :white-space "nowrap", :overflow "hidden", :width "1px", :border-width "0", :padding "0", :position "absolute", :height "1px", :margin "-1px"}
+
+ :divide-dashed [["& > * + *" {:border-style "dashed"}]]
+ :divide-dotted [["& > * + *" {:border-style "dotted"}]]
+ :divide-double [["& > * + *" {:border-style "double"}]]
+ :divide-none [["& > * + *" {:border-style "none"}]]
+ :divide-solid [["& > * + *" {:border-style "solid"}]]
+
+ :divide-x [["& > * + *" {:border-right-width "1px", :border-left-width "0px"}]]
+ :divide-x-0 [["& > * + *" {:border-right-width "0px", :border-left-width "0px"}]]
+ :divide-x-2 [["& > * + *" {:border-right-width "2px", :border-left-width "0px"}]]
+ :divide-x-4 [["& > * + *" {:border-right-width "4px", :border-left-width "0px"}]]
+ :divide-x-8 [["& > * + *" {:border-right-width "8px", :border-left-width "0px"}]]
+ :divide-y [["& > * + *" {:border-top-width "0px", :border-bottom-width "1px"}]]
+ :divide-y-0 [["& > * + *" {:border-top-width "0px", :border-bottom-width "0px"}]]
+ :divide-y-2 [["& > * + *" {:border-top-width "0px", :border-bottom-width "2px"}]]
+ :divide-y-4 [["& > * + *" {:border-top-width "0px", :border-bottom-width "4px"}]]
+ :divide-y-8 [["& > * + *" {:border-top-width "0px", :border-bottom-width "8px"}]]
 
  }

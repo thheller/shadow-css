@@ -20,7 +20,7 @@
    "px-" [:padding-left :padding-right]
    "py-" [:padding-top :padding-bottom]
    "pt-" [:padding-top]
-   "pb-" [:padding-bottomn]
+   "pb-" [:padding-bottom]
    "pl-" [:padding-left]
    "pr-" [:padding-right]
 
@@ -39,8 +39,9 @@
    "bottom-" [:bottom]
    "left-" [:left]
 
-   "inset-x" [:left :right]
-   "inset-y" [:top :bottom]
+   "inset-x-" [:left :right]
+   "inset-y-" [:top :bottom]
+   "inset-" [:top :right :bottom :left]
 
    ;; width
    "w-" [:width]
@@ -80,10 +81,13 @@
         spacing))))
 
 (def color-alias-groups
-  {"bg-" [:background-color]
-   "border-" [:border-color]
-   "outline-" [:outline-color]
-   "text-" [:color]})
+  {"bg-" :background-color
+   "border-" :border-color
+   "outline-" :outline-color
+   "text-" :color
+   "divide-"
+   (fn [color]
+     [["& > * + *" {:border-color color}]])})
 
 (defn generate-color-aliases* [aliases colors]
   (reduce
@@ -92,7 +96,15 @@
         (fn [aliases alias-prefix props]
           (assoc aliases
             (keyword (str alias-prefix color-name suffix))
-            (reduce #(assoc %1 %2 color) {} props)))
+            (cond
+              (keyword? props)
+              {props color}
+
+              (fn? props)
+              (props color)
+
+              :else
+              nil)))
         aliases
         color-alias-groups))
     aliases
