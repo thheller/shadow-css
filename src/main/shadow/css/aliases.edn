@@ -32,6 +32,14 @@
  :odd "&:nth-child(odd)"
  :even "&:nth-child(even)"
 
+ :container
+ [:w-full
+  [:sm {:max-width "640px"}]
+  [:md {:max-width "768px"}]
+  [:lg {:max-width "1024px"}]
+  [:xl {:max-width "1280px"}]
+  [:xxl {:max-width "1536px"}]]
+
  ;; color naming scheme based on
  ;; https://material.io/design/color/the-color-system.html#color-usage-and-palettes
  ;; https://material.io/resources/color/
