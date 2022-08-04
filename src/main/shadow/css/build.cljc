@@ -157,10 +157,16 @@
     (emit-rule w sel rules)
     (emitln w "}")))
 
-(defn generate-css [build-state {:keys [rules] :as chunk}]
+(defn generate-css [build-state {:keys [rules classpath-includes] :as chunk}]
   (assoc chunk
     :css
     (let [sw #?(:clj (StringWriter.) :cljs (StringBuffer.))]
+      (emitln sw (:preflight-src build-state))
+
+      #?@(:clj
+          [(doseq [inc classpath-includes]
+             (emitln sw (slurp (io/resource inc))))])
+
       (doseq [def rules]
         (emit-def sw def))
       (.toString sw))))
@@ -249,6 +255,31 @@
         (update build-state :outputs conj output)))
     (assoc build-state :outputs [])
     chunks))
+
+
+;; simplistic regexp based css minifier
+;; it'll destroy some stuff for sure
+;; but for now it seems to be ok and doesn't require parsing css
+(defn minify-chunk [output]
+  (update output :css
+    (fn [css]
+      (-> css
+          ;; collapse multiple whitespace to one first
+          (str/replace #"\s+" " ")
+          ;; remove comments
+          (str/replace #"\/\*(.*?)\*\/" "")
+          ;; remove a few more whitespace
+          (str/replace #"\s\{\s" "{")
+          (str/replace #";\s+\}\s*" "}")
+          (str/replace #";\s+" ";")
+          (str/replace #":\s+" ":")
+          (str/replace #"\s*,\s*" ",")
+          ))))
+
+(defn minify [build-state]
+  (update build-state :outputs
+    (fn [outputs]
+      (mapv minify-chunk outputs))))
 
 (defn index-source [build-state src]
   (let [{:keys [ns] :as contents}
@@ -351,12 +382,8 @@
            (let [output-file (io/file output-dir (str (name chunk-id) ".css"))]
              (io/make-parents output-file)
              (spit output-file
-               (str (when (:base output)
-                      (str (:preflight-src build-state) "\n"))
-                    css "\n"
-                    (->> classpath-includes
-                         (map #(slurp (io/resource %)))
-                         (str/join "\n"))))))
+               css
+               )))
 
          build-state)
 
