@@ -2,6 +2,7 @@
   (:require
     [shadow.css.specs :as s]
     [shadow.css.analyzer :as ana]
+    [clojure.set :as set]
     [clojure.string :as str]
     #?@(:clj
         [[clojure.edn :as edn]
@@ -157,24 +158,25 @@
     (emit-rule w sel rules)
     (emitln w "}")))
 
-(defn generate-css [build-state {:keys [rules classpath-includes] :as chunk}]
-  (assoc chunk
-    :css
-    (let [sw #?(:clj (StringWriter.) :cljs (StringBuffer.))]
-      (emitln sw (:preflight-src build-state))
+(defn build-css-for-chunk [build-state chunk-id]
+  (update-in build-state [:chunks chunk-id]
+    (fn [{:keys [base rules classpath-includes] :as chunk}]
+      (assoc chunk
+        :css
+        (let [sw #?(:clj (StringWriter.) :cljs (StringBuffer.))]
+          (when base
+            (emitln sw (:preflight-src build-state)))
 
-      #?@(:clj
-          [(doseq [inc classpath-includes]
-             (emitln sw (slurp (io/resource inc))))])
+          #?@(:clj
+              [(doseq [inc classpath-includes]
+                 (emitln sw (slurp (io/resource inc))))])
 
-      (doseq [def rules]
-        (emit-def sw def))
-      (.toString sw))))
+          (doseq [def rules]
+            (emit-def sw def))
+          (.toString sw))))))
 
-(defn build-css-for-chunk
-  [{:keys [namespaces] :as build-state} {:keys [include] :as chunk}]
-  ;; FIXME: should support :entries and follow them, but for that we need full namespace indexing
-
+(defn collect-namespaces-for-chunk
+  [{:keys [include entries] :as chunk} {:keys [namespaces] :as build-state}]
   (let [namespace-matchers
         (->> include
              (map (fn [x]
@@ -203,65 +205,124 @@
                           )))))
              (into []))
 
+
+        {entry-namespaces :namespaces}
+        (reduce
+          (fn step-fn [{:keys [visited] :as m} ns]
+            (cond
+              (contains? visited ns)
+              m
+
+              ;; npm support later
+              (string? ns)
+              m
+
+              :else
+              (let [ns-info (get namespaces ns)]
+                (-> m
+                    (update :namespaces conj ns)
+                    (update :visited conj ns)
+                    (ana/reduce-> step-fn (:requires ns-info))))))
+
+          {:visited #{}
+           :namespaces #{}}
+          entries)
+
         included-namespaces
-        (->> (vals namespaces)
-             (filter (fn [{:keys [ns]}]
-                       (some (fn [matcher] (matcher ns)) namespace-matchers)))
-             (into []))
+        (->> (keys namespaces)
+             (filter (fn [ns]
+                       (or (contains? entry-namespaces ns)
+                           (some (fn [matcher] (matcher ns)) namespace-matchers))))
+             (into []))]
 
-        all-rules
-        (->> (for [{:keys [ns css] :as ns-info} included-namespaces
-                   {:keys [line column] :as form-info} css
-                   :let [css-id (s/generate-id ns line column)]]
-               (-> (ana/process-form build-state form-info)
-                   (assoc
-                     :ns ns
-                     :css-id css-id
-                     ;; FIXME: when adding optimization pass selector won't be based on css-id anymore
-                     :sel (str "." css-id)))
-               )
-             (into []))
+    (assoc chunk :namespaces included-namespaces)))
 
-        cp-includes
-        (into #{} (for [{:keys [ns-meta]} included-namespaces
-                        include (:shadow.css/include ns-meta)]
-                    include))
+(defn build-css-for-chunks
+  [{:keys [namespaces] :as build-state}]
+  (reduce-kv
+    (fn [build-state chunk-id chunk]
+      (let [all-rules
+            (->> (for [ns (:chunk-namespaces chunk)
+                       :let [{:keys [ns css] :as ns-info} (get namespaces ns)]
+                       {:keys [line column] :as form-info} css
+                       :let [css-id (s/generate-id ns line column)]]
+                   (-> (ana/process-form build-state form-info)
+                       (assoc
+                         :ns ns
+                         :css-id css-id
+                         ;; FIXME: when adding optimization pass selector won't be based on css-id anymore
+                         :sel (str "." css-id))))
+                 (into []))
 
-        warnings
-        (vec
-          (for [{:keys [warnings ns line column]} all-rules
-                warning warnings]
-            (assoc warning :ns ns :line line :column column)))]
+            cp-includes
+            (into #{} (for [ns (:chunk-namespace chunk)
+                            :let [{:keys [ns-meta]} (get namespaces ns)]
+                            include (:shadow.css/include ns-meta)]
+                        include))
 
-    ;; TODO: merge media queries so they are only emitted once and not per rule
-    ;; TODO: add optional optimization step to collapse classes
-    ;; TODO: css minifier
+            warnings
+            (vec
+              (for [{:keys [warnings ns line column]} all-rules
+                    warning warnings]
+                (assoc warning :ns ns :line line :column column)))]
 
-    (generate-css build-state
-      (-> chunk
-          (assoc :warnings warnings
-                 :classpath-includes cp-includes
-                 :rules all-rules)))))
+        (-> build-state
+            (update-in [:chunks chunk-id] assoc
+              :warnings warnings
+              :classpath-includes cp-includes
+              :rules all-rules)
+            (build-css-for-chunk chunk-id))))
+
+    build-state
+    (:chunks build-state)))
+
+(defn trim-chunks [build-state]
+  (update build-state :chunks
+    (fn [chunks]
+      (reduce-kv
+        (fn [chunks chunk-id {:keys [depends-on namespaces] :as chunk}]
+          (if-not (seq depends-on)
+            (assoc-in chunks [chunk-id :chunk-namespaces] (set namespaces))
+            (let [provided-by-deps
+                  (reduce
+                    (fn step-fn [ns-set module-id]
+                      (let [{:keys [namespaces] :as other} (get chunks module-id)]
+                        (-> ns-set
+                            (set/union (set namespaces))
+                            (ana/reduce-> step-fn (:depends-on other)))))
+                    #{}
+                    depends-on)]
+              (assoc-in chunks [chunk-id :chunk-namespaces] (set/difference (set namespaces) provided-by-deps))
+              )))
+        chunks
+        chunks))))
 
 (defn generate [build-state chunks]
   ;; FIXME: actually support chunks, similar to CLJS with :depends-on #{:other-chunk}
   ;; so chunks don't repeat everything, for that needs to analyze chunks first
   ;; then produce output
-  (reduce-kv
-    (fn [build-state chunk-id chunk]
-      (let [output
-            (-> (build-css-for-chunk build-state chunk)
-                (assoc :chunk-id chunk-id :base true))]
-        (update build-state :outputs conj output)))
-    (assoc build-state :outputs [])
-    chunks))
+  (-> build-state
+      (assoc :chunks {})
+      (ana/reduce-kv->
+        (fn [build-state chunk-id chunk]
+          (let [chunk
+                (-> chunk
+                    (assoc :chunk-id chunk-id)
+                    (cond->
+                      (not (contains? chunk :depends-on))
+                      (assoc :base true))
+                    (collect-namespaces-for-chunk build-state))]
 
+            (assoc-in build-state [:chunks chunk-id] chunk)))
+        chunks)
+      (trim-chunks)
+      (build-css-for-chunks)))
 
 ;; simplistic regexp based css minifier
 ;; it'll destroy some stuff for sure
 ;; but for now it seems to be ok and doesn't require parsing css
-(defn minify-chunk [output]
-  (update output :css
+(defn minify-chunk [chunk]
+  (update chunk :css
     (fn [css]
       (-> css
           ;; collapse multiple whitespace to one first
@@ -277,9 +338,7 @@
           ))))
 
 (defn minify [build-state]
-  (update build-state :outputs
-    (fn [outputs]
-      (mapv minify-chunk outputs))))
+  (update build-state :chunks update-vals minify-chunk))
 
 (defn index-source [build-state src]
   (let [{:keys [ns] :as contents}

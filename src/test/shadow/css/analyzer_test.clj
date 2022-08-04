@@ -45,8 +45,9 @@
   (time
     (tap>
       (-> (build/start)
-          (build/index-path "src/main" {})
-          #_(build/generate '{:main {:include [shadow.cljs.ui.*]}})))))
+          (build/index-path (io/file "src" "main") {})
+          (build/generate '{:main {:include [shadow.cljs.ui.components*]}
+                            :test {:entries [shadow.cljs.ui.main] :depends-on #{:main}}})))))
 
 (defn parse-tailwind [[tbody tbody-attrs & rows]]
   (reduce
