@@ -4,7 +4,7 @@
 
 CSS-in-Clojure(Script). `shadow.css` is essentially a mini DSL for writing CSS directly in Clojure(Script) Code, allowing you to directly write CSS where it is used.
 
-Play with it live directly in your browser via the [shadow-grove Playground](https://code.thheller.com/shadow-grove-playground/0.3.0/).
+Play with it live directly in your browser via the [shadow-grove Playground](https://code.thheller.com/shadow-grove-playground/0.4.0/).
 
 Jump to:
 - [Using the CSS macro](#usage)
