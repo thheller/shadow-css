@@ -436,13 +436,14 @@
          (spit output-to (safe-pr-str {:version 1 :namespaces namespaces}))
          build-state)
 
-       (defn write-outputs-to [{:keys [outputs] :as build-state} ^File output-dir]
-         (doseq [{:keys [chunk-id css classpath-includes] :as output} outputs]
-           (let [output-file (io/file output-dir (str (name chunk-id) ".css"))]
-             (io/make-parents output-file)
-             (spit output-file
-               css
-               )))
+       (defn write-outputs-to [build-state ^File output-dir]
+         (reduce-kv
+           (fn [_ chunk-id {:keys [css] :as chunk}]
+             (let [output-file (io/file output-dir (str (name chunk-id) ".css"))]
+               (io/make-parents output-file)
+               (spit output-file css)))
+           nil
+           (:chunks build-state))
 
          build-state)
 
