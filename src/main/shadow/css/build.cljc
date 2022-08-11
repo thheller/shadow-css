@@ -255,7 +255,7 @@
                  (into []))
 
             cp-includes
-            (into #{} (for [ns (:chunk-namespace chunk)
+            (into #{} (for [ns (:chunk-namespaces chunk)
                             :let [{:keys [ns-meta]} (get namespaces ns)]
                             include (:shadow.css/include ns-meta)]
                         include))
