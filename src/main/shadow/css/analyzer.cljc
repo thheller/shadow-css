@@ -350,7 +350,8 @@
           (let [next-state (find-css-calls state form)]
             (cond
               (and (not ns-found) (not (:ns next-state)))
-              (throw (ex-info "ns form not first?" {}))
+              ;; do not continue without ns form being first, just don't look for css
+              next-state
 
               (not has-css?)
               next-state
