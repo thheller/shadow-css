@@ -604,4 +604,8 @@
  :divide-y-4 [["& > * + *" {:border-top-width "0px", :border-bottom-width "4px"}]]
  :divide-y-8 [["& > * + *" {:border-top-width "0px", :border-bottom-width "8px"}]]
 
+  ;; visibility
+ :visible {:visibility "visible"}
+ :invisible {:visibility "hidden"}
+
  }
