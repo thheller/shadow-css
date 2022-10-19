@@ -175,6 +175,8 @@
  :shrink {:flex-shrink "1"}
  :shrink-0 {:flex-shrink "0"}
 
+ :grow {:flex-grow "1"}
+ :grow-0 {:flex-grow "0"}
 
 
  ;; flex align-items
@@ -604,7 +606,7 @@
  :divide-y-4 [["& > * + *" {:border-top-width "0px", :border-bottom-width "4px"}]]
  :divide-y-8 [["& > * + *" {:border-top-width "0px", :border-bottom-width "8px"}]]
 
-  ;; visibility
+ ;; visibility
  :visible {:visibility "visible"}
  :invisible {:visibility "hidden"}
 
