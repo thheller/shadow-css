@@ -379,6 +379,26 @@
  :h-max {:height "max-content"}
  :h-fit {:height "fit-content"}
 
+ :h-1of2 {:height "50%"}
+
+ :h-1of3 {:height "33.333333%"}
+ :h-2of3 {:height "66.666667%"}
+
+ :h-1of4 {:height "25%"}
+ :h-2of4 {:height "50%"}
+ :h-3of4 {:height "75%"}
+
+ :h-1of5 {:height "20%"}
+ :h-2of5 {:height "40%"}
+ :h-3of5 {:height "60%"}
+ :h-4of5 {:height "80%"}
+
+ :h-1of6 {:height "16.666667%"} 
+ :h-2of6 {:height "33.333333%"}
+ :h-3of6 {:height "50%"}
+ :h-4of6 {:height "66.666667%"}
+ :h-5of6 {:height "83.333333%"}
+
  :min-h-0 {:min-height "0px"}
  :min-h-fit {:min-height "fit-content"}
  :min-h-full {:min-height "100%"}
@@ -392,7 +412,7 @@
  :max-h-min {:max-height "min-content"}
  :max-h-screen {:max-height "100vh"}
 
- ;; height, rest auto-generated
+ ;; width, rest auto-generated
  :w-auto {:width "auto"}
  :w-full {:width "100%"}
  :w-screen {:width "100vw"}
@@ -414,11 +434,11 @@
  :w-3of5 {:width "60%"}
  :w-4of5 {:width "80%"}
 
+ :w-1of6 {:width "16.666667%"}
  :w-2of6 {:width "33.333333%"}
  :w-3of6 {:width "50%"}
  :w-4of6 {:width "66.666667%"}
  :w-5of6 {:width "83.333333%"}
- :w-1of6 {:width "16.666667%"}
 
  :w-1of12 {:width "8.333333%"}
  :w-2of12 {:width "16.666667%"}
