@@ -79,9 +79,9 @@
           (reduce-kv
             (fn [aliases prefix props]
               (if (string? prefix)
-                (if (= \- (first prefix))
-                  (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 (str "-" space-val)) {} props))
-                  (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 space-val) {} props)))
+                (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 (if (= \- (first prefix))
+                                                                                        (str "-" space-val)
+                                                                                        space-val)) {} props))
                 (let [[prefix sub-sel] prefix]
                   (assoc aliases (keyword (str prefix space-num)) [[sub-sel (reduce #(assoc %1 %2 space-val) {} props)]])
                   )))
