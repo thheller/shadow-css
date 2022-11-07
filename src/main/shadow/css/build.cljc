@@ -39,10 +39,17 @@
    "right-" [:right]
    "bottom-" [:bottom]
    "left-" [:left]
+   "-top-" [:top]
+   "-right-" [:right]
+   "-bottom-" [:bottom]
+   "-left-" [:left]
 
    "inset-x-" [:left :right]
    "inset-y-" [:top :bottom]
    "inset-" [:top :right :bottom :left]
+   "-inset-x-" [:left :right]
+   "-inset-y-" [:top :bottom]
+   "-inset-" [:top :right :bottom :left]
 
    ;; width
    "w-" [:width]
@@ -72,7 +79,9 @@
           (reduce-kv
             (fn [aliases prefix props]
               (if (string? prefix)
-                (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 space-val) {} props))
+                (if (= \- (first prefix))
+                  (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 (str "-" space-val)) {} props))
+                  (assoc aliases (keyword (str prefix space-num)) (reduce #(assoc %1 %2 space-val) {} props)))
                 (let [[prefix sub-sel] prefix]
                   (assoc aliases (keyword (str prefix space-num)) [[sub-sel (reduce #(assoc %1 %2 space-val) {} props)]])
                   )))
