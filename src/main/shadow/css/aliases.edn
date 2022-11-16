@@ -512,6 +512,10 @@
  :cursor-zoom-in {:cursor "zoom-in"}
  :cursor-zoom-out {:cursor "zoom-out"}
 
+ ;; pointer events
+ :pointer-events-none {:pointer-events "none"}
+ :pointer-events-auto {:pointer-events "auto"}
+
  ;; position
  :absolute {:position "absolute"}
  :fixed {:position "fixed"}
