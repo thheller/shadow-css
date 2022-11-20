@@ -4,28 +4,31 @@
 
 (s/def ::alias keyword?)
 
+(defn non-empty-string? [s]
+  (and (string? s) (not (str/blank? s))))
+
 (s/def ::str-part
   ;; str or alias
-  #(or (string? %) (keyword? %)))
+  #(or (non-empty-string? %) (keyword? %)))
 
 (s/def ::str-concat
   (s/coll-of ::str-part :kind list?))
 
 (s/def ::val
   (s/or
-    :string string?
+    :string non-empty-string?
     :number number?
     :alias ::alias
     :concat ::str-concat))
 
 (s/def ::passthrough
-  string?)
+  non-empty-string?)
 
 (s/def ::map
   (s/map-of simple-keyword? ::val))
 
 (defn sub-selector? [x]
-  (and (string? x)
+  (and (non-empty-string? x)
        (or (str/starts-with? x "@")
            (str/index-of x "&"))))
 
