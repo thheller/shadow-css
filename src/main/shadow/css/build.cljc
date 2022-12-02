@@ -67,8 +67,8 @@
    "gap-x-" [:column-gap]
    "gap-y-" [:row-gap]
 
-   ["space-x-" "& > * + *"] [:padding-left :padding-right]
-   ["space-y-" "& > * + *"] [:padding-top :padding-bottom]
+   ["space-x-" "& > * + *"] [:margin-left]
+   ["space-y-" "& > * + *"] [:margin-top]
    })
 
 (defn generate-spacing-aliases [{:keys [spacing] :as build-state}]
