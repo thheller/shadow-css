@@ -14,64 +14,7 @@
      :cljs
      (:import [goog.string StringBuffer])))
 
-;; same naming patterns tailwind uses
-(def spacing-alias-groups
-  ;; padding
-  {"p-" [:padding]
-   "px-" [:padding-left :padding-right]
-   "py-" [:padding-top :padding-bottom]
-   "pt-" [:padding-top]
-   "pb-" [:padding-bottom]
-   "pl-" [:padding-left]
-   "pr-" [:padding-right]
-
-   ;; margin
-   "m-" [:margin]
-   "mx-" [:margin-left :margin-right]
-   "my-" [:margin-top :margin-bottom]
-   "mt-" [:margin-top]
-   "mb-" [:margin-bottom]
-   "ml-" [:margin-left]
-   "mr-" [:margin-right]
-
-   ;; positions
-   "top-" [:top]
-   "right-" [:right]
-   "bottom-" [:bottom]
-   "left-" [:left]
-   "-top-" [:top]
-   "-right-" [:right]
-   "-bottom-" [:bottom]
-   "-left-" [:left]
-
-   "inset-x-" [:left :right]
-   "inset-y-" [:top :bottom]
-   "inset-" [:top :right :bottom :left]
-   "-inset-x-" [:left :right]
-   "-inset-y-" [:top :bottom]
-   "-inset-" [:top :right :bottom :left]
-
-   ;; width
-   "w-" [:width]
-   "max-w-" [:max-width]
-
-   ;; height
-   "h-" [:height]
-   "max-h-" [:max-height]
-
-   ;; flex
-   "basis-" [:flex-basis]
-
-   ;; grid
-   "gap-" [:gap]
-   "gap-x-" [:column-gap]
-   "gap-y-" [:row-gap]
-
-   ["space-x-" "& > * + *"] [:padding-left :padding-right]
-   ["space-y-" "& > * + *"] [:padding-top :padding-bottom]
-   })
-
-(defn generate-spacing-aliases [{:keys [spacing] :as build-state}]
+(defn generate-spacing-aliases [{:keys [alias-groups spacing] :as build-state}]
   (update build-state :aliases
     (fn [aliases]
       (reduce-kv
@@ -86,20 +29,11 @@
                   (assoc aliases (keyword (str prefix space-num)) [[sub-sel (reduce #(assoc %1 %2 space-val) {} props)]])
                   )))
             aliases
-            spacing-alias-groups))
+            (:spacing alias-groups)))
         aliases
         spacing))))
 
-(def color-alias-groups
-  {"bg-" :background-color
-   "border-" :border-color
-   "outline-" :outline-color
-   "text-" :color
-   "divide-"
-   (fn [color]
-     [["& > * + *" {:border-color color}]])})
-
-(defn generate-color-aliases* [aliases colors]
+(defn generate-color-aliases* [aliases alias-groups colors]
   (reduce
     (fn [aliases [color-name suffix color]]
       (reduce-kv
@@ -116,14 +50,14 @@
               :else
               nil)))
         aliases
-        color-alias-groups))
+        (:color alias-groups)))
     aliases
     (for [[name vals] colors
           [suffix color] vals]
       [name suffix color])))
 
-(defn generate-color-aliases [{:keys [colors] :as build-state}]
-  (update build-state :aliases generate-color-aliases* colors))
+(defn generate-color-aliases [{:keys [alias-groups colors] :as build-state}]
+  (update build-state :aliases generate-color-aliases* alias-groups colors))
 
 ;; helper methods for eventual data collection for source mapping
 (defn emits
@@ -363,6 +297,72 @@
 (defn init []
   {:namespaces
    {}
+
+   :alias-groups
+   ;; same naming patterns tailwind uses
+   {:color
+    {"bg-" :background-color
+     "border-" :border-color
+     "outline-" :outline-color
+     "text-" :color
+     "divide-"
+     (fn [color]
+       [["& > * + *" {:border-color color}]])}
+
+    :spacing
+    ;; padding
+    {"p-" [:padding]
+     "px-" [:padding-left :padding-right]
+     "py-" [:padding-top :padding-bottom]
+     "pt-" [:padding-top]
+     "pb-" [:padding-bottom]
+     "pl-" [:padding-left]
+     "pr-" [:padding-right]
+
+     ;; margin
+     "m-" [:margin]
+     "mx-" [:margin-left :margin-right]
+     "my-" [:margin-top :margin-bottom]
+     "mt-" [:margin-top]
+     "mb-" [:margin-bottom]
+     "ml-" [:margin-left]
+     "mr-" [:margin-right]
+
+     ;; positions
+     "top-" [:top]
+     "right-" [:right]
+     "bottom-" [:bottom]
+     "left-" [:left]
+     "-top-" [:top]
+     "-right-" [:right]
+     "-bottom-" [:bottom]
+     "-left-" [:left]
+
+     "inset-x-" [:left :right]
+     "inset-y-" [:top :bottom]
+     "inset-" [:top :right :bottom :left]
+     "-inset-x-" [:left :right]
+     "-inset-y-" [:top :bottom]
+     "-inset-" [:top :right :bottom :left]
+
+     ;; width
+     "w-" [:width]
+     "max-w-" [:max-width]
+
+     ;; height
+     "h-" [:height]
+     "max-h-" [:max-height]
+
+     ;; flex
+     "basis-" [:flex-basis]
+
+     ;; grid
+     "gap-" [:gap]
+     "gap-x-" [:column-gap]
+     "gap-y-" [:row-gap]
+
+     ["space-x-" "& > * + *"] [:padding-left :padding-right]
+     ["space-y-" "& > * + *"] [:padding-top :padding-bottom]}}
 
    :aliases
    {}
