@@ -31,7 +31,7 @@ I wanted something that ...
 
 - **has close to zero (or actually zero) runtime impact and code size (for frontend CLJS builds)**
 - gives me the expressive power of Tailwind aliases, while still giving me full access to all of CSS
-- stays entirely in the CLS(S) space with no outside dependencies (`node` not required)
+- stays entirely in the CLJ(S) space with no outside dependencies (`node` not required)
 - is usable in all CLJ(S) projects and libraries
 - is completely framework-agnostic, with no expectations for how the HTML/DOM is actually generated
 - integrates seamlessly with CSS written by other means
