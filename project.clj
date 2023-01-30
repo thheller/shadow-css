@@ -1,4 +1,4 @@
-(defproject com.thheller/shadow-css "0.4.2"
+(defproject com.thheller/shadow-css "0.4.3"
   :description "CSS-in-CLJ(S)"
   :url "https://github.com/thheller/shadow-css"
 
