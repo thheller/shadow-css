@@ -150,7 +150,7 @@
 
  ;; flexbox
  :flex {:display "flex"}
- :flex-inline {:display "flex-inline"}
+ :flex-inline {:display "inline-flex"}
 
  ;; flex
  :flex-1 {:flex "1 1 0%"}
