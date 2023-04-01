@@ -423,7 +423,8 @@
          (let [files
                (->> root
                     (file-seq)
-                    (filter #(clj-file? (.getName ^File %))))]
+                    (filter #(clj-file? (.getName ^File %)))
+                    (remove #(.isHidden ^File %)))]
 
            ;; FIXME: reducers/parallel?
            ;; takes ~80ms for entire shadow-cljs codebase which is fine
