@@ -357,6 +357,11 @@
  :shadow-sm {:box-shadow "0 1px 2px 0 rgb(0 0 0 / 0.05)"}
  :shadow-xl {:box-shadow "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"}
 
+
+ ;; box sizing
+ :box-border {:box-sizing "border-box"}
+ :box-content {:box-sizing "box-content"}
+
  ;; outline
  :outline {:outline-style "solid"}
  :outline-dashed {:outline-style "dashed"}
@@ -516,6 +521,13 @@
  :cursor-zoom-in {:cursor "zoom-in"}
  :cursor-zoom-out {:cursor "zoom-out"}
 
+
+ ;; select
+ :select-none {:user-select "none"}
+ :select-text {:user-select "text"}
+ :select-all {:user-select "all"}
+ :select-auto {:user-select "auto"}
+
  ;; pointer events
  :pointer-events-none {:pointer-events "none"}
  :pointer-events-auto {:pointer-events "auto"}
@@ -623,16 +635,16 @@
  :divide-none [["& > * + *" {:border-style "none"}]]
  :divide-solid [["& > * + *" {:border-style "solid"}]]
 
- :divide-x [["& > * + *" {:border-right-width "1px", :border-left-width "0px"}]]
+ :divide-x [["& > * + *" {:border-right-width "0px", :border-left-width "1px"}]]
  :divide-x-0 [["& > * + *" {:border-right-width "0px", :border-left-width "0px"}]]
- :divide-x-2 [["& > * + *" {:border-right-width "2px", :border-left-width "0px"}]]
- :divide-x-4 [["& > * + *" {:border-right-width "4px", :border-left-width "0px"}]]
- :divide-x-8 [["& > * + *" {:border-right-width "8px", :border-left-width "0px"}]]
- :divide-y [["& > * + *" {:border-top-width "0px", :border-bottom-width "1px"}]]
+ :divide-x-2 [["& > * + *" {:border-right-width "0px", :border-left-width "2px"}]]
+ :divide-x-4 [["& > * + *" {:border-right-width "0px", :border-left-width "4px"}]]
+ :divide-x-8 [["& > * + *" {:border-right-width "0px", :border-left-width "8px"}]]
+ :divide-y [["& > * + *" {:border-top-width "1px", :border-bottom-width "0px"}]]
  :divide-y-0 [["& > * + *" {:border-top-width "0px", :border-bottom-width "0px"}]]
- :divide-y-2 [["& > * + *" {:border-top-width "0px", :border-bottom-width "2px"}]]
- :divide-y-4 [["& > * + *" {:border-top-width "0px", :border-bottom-width "4px"}]]
- :divide-y-8 [["& > * + *" {:border-top-width "0px", :border-bottom-width "8px"}]]
+ :divide-y-2 [["& > * + *" {:border-top-width "2px", :border-bottom-width "0px"}]]
+ :divide-y-4 [["& > * + *" {:border-top-width "4px", :border-bottom-width "0px"}]]
+ :divide-y-8 [["& > * + *" {:border-top-width "8px", :border-bottom-width "0px"}]]
 
  ;; visibility
  :visible {:visibility "visible"}
