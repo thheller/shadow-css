@@ -412,7 +412,7 @@
 #?(:clj
    (do (defn clj-file? [filename]
          ;; .clj .cljs .cljc .cljd
-         (str/index-of filename ".clj"))
+         (re-matches #".+\.clj[cs]?$" filename))
 
        (defn index-file [build-state ^File file]
          (let [src (slurp file)]
