@@ -96,8 +96,8 @@
       conformed)))
 
 (defn generate-id
-  "Generates a class name which is unique given the contents. Please have a look
-  at the tests for more information."
+  "Generates a class name which is unique given the contents. Will account for
+  different ordering within the subqueries."
   [rules]
   (str "sc-" (postwalk
               (fn [rule]
