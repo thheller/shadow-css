@@ -14,3 +14,5 @@ pom.xml.asc
 /.idea
 .hgignore
 .hg/
+/.lsp/
+/.clj-kondo/
