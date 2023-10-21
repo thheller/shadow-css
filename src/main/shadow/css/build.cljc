@@ -91,7 +91,7 @@
       (emitln w "  " (name prop) ": " (get group-rules prop) ";"))
     (emitln w "}")))
 
-(defn emit-meta-comment [w rules]
+(defn emit-meta-comments [w rules]
   (emitln w (str "/*\n"
                  (str/join "\n"
                            (for [{:keys [ns line column]} rules]
@@ -119,7 +119,9 @@
                  (emitln sw (slurp (io/resource inc))))])
 
           (doseq [[_ def-rules] (group-by :css-id rules)]
-            (emit-meta-comment sw def-rules)
+            ;; emit comments for all of the rules
+            (emit-meta-comments sw def-rules)
+            ;; but we only need to emit the first actual def
             (emit-def sw (first def-rules)))
 
           (.toString sw))))))
