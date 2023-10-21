@@ -187,8 +187,8 @@
       (let [all-rules
             (->> (for [ns (:chunk-namespaces chunk)
                        :let [{:keys [ns css] :as ns-info} (get namespaces ns)]
-                       {:keys [line column] :as form-info} css
-                       :let [css-id (s/generate-id ns line column)]]
+                       {:keys [form] :as form-info} css
+                       :let [css-id (s/generate-id form)]]
                    (-> (ana/process-form build-state form-info)
                        (assoc
                          :ns ns
