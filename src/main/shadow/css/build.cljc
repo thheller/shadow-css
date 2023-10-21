@@ -91,7 +91,10 @@
       (emitln w "  " (name prop) ": " (get group-rules prop) ";"))
     (emitln w "}")))
 
-(defn emit-meta-comments [w rules]
+(defn emit-meta-comments
+  "Within a single comment, output a list of namespaces, line and column numbers
+  for a given set of rules."
+  [w rules]
   (emitln w (str "/*\n"
                  (str/join "\n"
                            (for [{:keys [ns line column]} rules]
