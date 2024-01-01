@@ -541,21 +541,24 @@
 
  ;; position
  :inset-0 {:top "0px" :right "0px" :bottom "0px" :left "0px"}
-
+ :top-full {:top "100%"}
+ :right-full {:right "100%"}
+ :bottom-full {:bottom "100%"}
+ :left-full {:left "100%"}
 
  ;; border-radius
  :rounded {:border-radius "0.25rem"}
  :rounded-2xl {:border-radius "1rem"}
  :rounded-3xl {:border-radius "1.5rem"}
- :rounded-b {:border-bottom-right-radius "0.25rem"}
- :rounded-b-2xl {:border-bottom-right-radius "1rem"}
- :rounded-b-3xl {:border-bottom-right-radius "1.5rem"}
+ :rounded-b {:border-bottom-right-radius "0.25rem" :border-bottom-left-radius "0.25rem"}
+ :rounded-b-2xl {:border-bottom-right-radius "1rem" :border-bottom-left-radius "1rem"}
+ :rounded-b-3xl {:border-bottom-right-radius "1.5rem" :border-bottom-left-radius "1.5rem"}
  :rounded-b-full {:border-bottom-right-radius "9999px", :border-bottom-left-radius "9999px"}
- :rounded-b-lg {:border-bottom-right-radius "0.5rem"}
- :rounded-b-md {:border-bottom-right-radius "0.375rem"}
+ :rounded-b-lg {:border-bottom-right-radius "0.5rem" :border-bottom-left-radius "0.5rem"}
+ :rounded-b-md {:border-bottom-right-radius "0.375rem" :border-bottom-left-radius "0.375rem"}
  :rounded-b-none {:border-bottom-right-radius "0px", :border-bottom-left-radius "0px"}
- :rounded-b-sm {:border-bottom-right-radius "0.125rem"}
- :rounded-b-xl {:border-bottom-right-radius "0.75rem"}
+ :rounded-b-sm {:border-bottom-right-radius "0.125rem" :border-bottom-left-radius "0.125rem"}
+ :rounded-b-xl {:border-bottom-right-radius "0.75rem" :border-bottom-left-radius "0.75rem"}
  :rounded-bl {:border-bottom-left-radius "0.25rem"}
  :rounded-bl-2xl {:border-bottom-left-radius "1rem"}
  :rounded-bl-3xl {:border-bottom-left-radius "1.5rem"}
@@ -575,37 +578,37 @@
  :rounded-br-sm {:border-bottom-right-radius "0.125rem"}
  :rounded-br-xl {:border-bottom-right-radius "0.75rem"}
  :rounded-full {:border-radius "9999px"}
- :rounded-l {:border-top-left-radius "0.25rem"}
- :rounded-l-2xl {:border-top-left-radius "1rem"}
- :rounded-l-3xl {:border-top-left-radius "1.5rem"}
+ :rounded-l {:border-top-left-radius "0.25rem" :border-bottom-left-radious "0.25rem"}
+ :rounded-l-2xl {:border-top-left-radius "1rem" :border-bottom-left-radius "1rem"}
+ :rounded-l-3xl {:border-top-left-radius "1.5rem" :border-bottom-left-radius "1.5rem"}
  :rounded-l-full {:border-top-left-radius "9999px", :border-bottom-left-radius "9999px"}
- :rounded-l-lg {:border-top-left-radius "0.5rem"}
- :rounded-l-md {:border-top-left-radius "0.375rem"}
+ :rounded-l-lg {:border-top-left-radius "0.5rem" :border-bottom-left-radius "0.5rem"}
+ :rounded-l-md {:border-top-left-radius "0.375rem" :border-bottom-left-radius "0.375rem"}
  :rounded-l-none {:border-top-left-radius "0px", :border-bottom-left-radius "0px"}
- :rounded-l-sm {:border-top-left-radius "0.125rem"}
- :rounded-l-xl {:border-top-left-radius "0.75rem"}
+ :rounded-l-sm {:border-top-left-radius "0.125rem" :border-bottom-left-radius "0.125rem"}
+ :rounded-l-xl {:border-top-left-radius "0.75rem" :border-bottom-left-radius "0.75rem"}
  :rounded-lg {:border-radius "0.5rem"}
  :rounded-md {:border-radius "0.375rem"}
  :rounded-none {:border-radius "0px"}
- :rounded-r {:border-top-right-radius "0.25rem"}
- :rounded-r-2xl {:border-top-right-radius "1rem"}
- :rounded-r-3xl {:border-top-right-radius "1.5rem"}
+ :rounded-r {:border-top-right-radius "0.25rem" :border-bottom-right-radius "0.25rem"}
+ :rounded-r-2xl {:border-top-right-radius "1rem" :border-bottom-right-radius "1rem"}
+ :rounded-r-3xl {:border-top-right-radius "1.5rem" :border-bottom-right-radius "1.5rem"}
  :rounded-r-full {:border-top-right-radius "9999px", :border-bottom-right-radius "9999px"}
- :rounded-r-lg {:border-top-right-radius "0.5rem"}
- :rounded-r-md {:border-top-right-radius "0.375rem"}
+ :rounded-r-lg {:border-top-right-radius "0.5rem" :border-bottom-right-radius "0.5rem"}
+ :rounded-r-md {:border-top-right-radius "0.375rem" :border-bottom-right-radius "0.375rem"}
  :rounded-r-none {:border-top-right-radius "0px", :border-bottom-right-radius "0px"}
- :rounded-r-sm {:border-top-right-radius "0.125rem"}
- :rounded-r-xl {:border-top-right-radius "0.75rem"}
+ :rounded-r-sm {:border-top-right-radius "0.125rem" :border-bottom-right-radius "0.125rem"}
+ :rounded-r-xl {:border-top-right-radius "0.75rem" :border-bottom-right-radius "0.75rem"}
  :rounded-sm {:border-radius "0.125rem"}
- :rounded-t {:border-top-left-radius "0.25rem"}
- :rounded-t-2xl {:border-top-left-radius "1rem"}
- :rounded-t-3xl {:border-top-left-radius "1.5rem"}
+ :rounded-t {:border-top-left-radius "0.25rem" :border-top-right-radius "0.25rem"}
+ :rounded-t-2xl {:border-top-left-radius "1rem" :border-top-right-radius "1rem"}
+ :rounded-t-3xl {:border-top-left-radius "1.5rem" :border-top-right-radius "1.5rem"}
  :rounded-t-full {:border-top-left-radius "9999px", :border-top-right-radius "9999px"}
- :rounded-t-lg {:border-top-left-radius "0.5rem"}
- :rounded-t-md {:border-top-left-radius "0.375rem"}
- :rounded-t-none {:border-top-left-radius "0px; border-top-right-radius: 0px"}
- :rounded-t-sm {:border-top-left-radius "0.125rem"}
- :rounded-t-xl {:border-top-left-radius "0.75rem"}
+ :rounded-t-lg {:border-top-left-radius "0.5rem" :border-top-right-radius "0.5rem"}
+ :rounded-t-md {:border-top-left-radius "0.375rem" :border-top-right-radius "0.375rem"}
+ :rounded-t-none {:border-top-left-radius "0px" :border-top-right-radius "0px"}
+ :rounded-t-sm {:border-top-left-radius "0.125rem" :border-top-right-radius "0.125rem"}
+ :rounded-t-xl {:border-top-left-radius "0.75rem" :border-top-right-radius "0.75rem"}
  :rounded-tl {:border-top-left-radius "0.25rem"}
  :rounded-tl-2xl {:border-top-left-radius "1rem"}
  :rounded-tl-3xl {:border-top-left-radius "1.5rem"}
