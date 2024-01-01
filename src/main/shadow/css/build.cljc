@@ -348,10 +348,12 @@
      ;; width
      "w-" [:width]
      "max-w-" [:max-width]
+     "min-w-" [:min-width]
 
      ;; height
      "h-" [:height]
      "max-h-" [:max-height]
+     "min-h-" [:min-height]
 
      ;; flex
      "basis-" [:flex-basis]
@@ -405,6 +407,10 @@
     56 "14rem"
     60 "15rem"
     64 "16rem"
+    68 "17rem"
+    72 "18rem"
+    76 "19rem"
+    80 "20rem"
     96 "24rem"}})
 
 ;; IO stuff not available in CLJS environments
