@@ -108,7 +108,8 @@
         :css
         (let [sw #?(:clj (StringWriter.) :cljs (StringBuffer.))]
           (when base
-            (emitln sw (:preflight-src build-state)))
+            (when-let [pre (:preflight-src build-state)]
+              (emitln sw pre)))
 
           #?@(:clj
               [(doseq [inc classpath-includes]
@@ -265,20 +266,25 @@
 ;; it'll destroy some stuff for sure
 ;; but for now it seems to be ok and doesn't require parsing css
 (defn minify-chunk [chunk]
-  (update chunk :css
-    (fn [css]
-      (-> css
-          ;; collapse multiple whitespace to one first
-          (str/replace #"\s+" " ")
-          ;; remove comments
-          (str/replace #"\/\*(.*?)\*\/" "")
-          ;; remove a few more whitespace
-          (str/replace #"\s\{\s" "{")
-          (str/replace #";\s+\}\s*" "}")
-          (str/replace #";\s+" ";")
-          (str/replace #":\s+" ":")
-          (str/replace #"\s*,\s*" ",")
-          ))))
+  #?(:cljs
+     ;; FIXME: I don't know why the below regexp breaks in JS, look into it
+     ;; currently only using JS variant in self-hosted grove examples app, which doesn't minify anyways
+     chunk
+     :clj
+     (update chunk :css
+       (fn [css]
+         (-> css
+             ;; collapse multiple whitespace to one first
+             (str/replace #"\s+" " ")
+             ;; remove comments
+             (str/replace #"\/\*(.*?)\*\/" "")
+             ;; remove a few more whitespace
+             (str/replace #"\s\{\s" "{")
+             (str/replace #";\s+\}\s*" "}")
+             (str/replace #";\s+" ";")
+             (str/replace #":\s+" ":")
+             (str/replace #"\s*,\s*" ",")
+             )))))
 
 (defn minify [build-state]
   (update build-state :chunks update-vals minify-chunk))
