@@ -16,6 +16,9 @@
  :xl+ "@media (min-width: 1280px)"
  :xxl+ "@media (min-width: 1536px)"
 
+ :dark "@media (prefers-color-scheme: dark)"
+ :light "@media (prefers-color-scheme: light)"
+
  :&hover "&:hover"
  :hover "&:hover"
  :focus "&:focus"
