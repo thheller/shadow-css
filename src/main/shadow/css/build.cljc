@@ -161,6 +161,9 @@
               (string? ns)
               m
 
+              (str/includes? (str ns) "*")
+              (throw (ex-info ":entries only takes full namespace names, not wildcards" {:ns ns}))
+
               :else
               (let [ns-info (get namespaces ns)]
                 (-> m
