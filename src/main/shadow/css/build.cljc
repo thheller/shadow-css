@@ -127,7 +127,7 @@
                     (cond
                       (string? x)
                       (let [re (re-pattern x)]
-                        #(re-find re %))
+                        #(re-find re (name %)))
 
                       (not (symbol? x))
                       (throw (ex-info "invalid include pattern" {:x x}))
