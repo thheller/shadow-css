@@ -1,4 +1,4 @@
-(defproject com.thheller/shadow-css "0.4.5"
+(defproject com.thheller/shadow-css "0.4.6"
   :description "CSS-in-CLJ(S)"
   :url "https://github.com/thheller/shadow-css"
 
@@ -12,8 +12,8 @@
 
   :dependencies
   [[org.clojure/clojure "1.11.1" :scope "provided"]
-   [org.clojure/clojurescript "1.11.60" :scope "provided"]
-   [org.clojure/tools.reader "1.3.6"]]
+   [org.clojure/clojurescript "1.11.132" :scope "provided"]
+   [org.clojure/tools.reader "1.4.2"]]
 
   :source-paths
   ["src/main"])
