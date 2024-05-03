@@ -15,7 +15,7 @@ Jump to:
 
 The syntax for defining the CSS is **stable** and pretty much final, same goes for the `css` macro. I only recently started using all of this, so I won't rule out potential additions, but what is here now will very likely stay as it is forever.
 
-The build side however is very early and very alpha. I expect things to change a lot here. Coming up with something that fits into existing CLJ(S) workflows is quite the challenge.
+The build side however is very rough. It works perfectly fine, but the developer experience could be better.
 
 If you want to see actual projects using this you may look at the [shadow-cljs UI](https://github.com/thheller/shadow-cljs/tree/master/src/main/shadow/cljs/ui) sources. Just search for `(css`.
 
@@ -23,7 +23,7 @@ If you want to see actual projects using this you may look at the [shadow-cljs U
 
 Writing and maintaining CSS is a burden. Editing CSS in actual `.css` files means you have to come up with names for everything so the HTML can actually reference the styles. Coming up with the names in the first place is hard, and maintaining them over time is even harder. Many naming conventions (eg. [BEM](http://getbem.com/)) exist, which helps shrink the problem but does not eliminate it. Writing actual CSS also requires constantly context switching since the syntax is much different from Clojure.
 
-Nowadays, [tailwindcss](https://tailwindcss.com/) has become very popular alternative, which sort of flips the naming problem. Instead, you have a lot of predefined aliases for commonly used CSS properties and use those to style elements. This works great and using Tailwind in CLJ(S) projects actually works quite well. However, it does require installing JS tools and running them.
+Nowadays, [tailwindcss](https://tailwindcss.com/) has become very popular alternative, which sort of flips the naming problem. Instead, you have a lot of predefined aliases for commonly used CSS properties and use those to style elements. This works great and using Tailwind in CLJ(S) projects actually works quite well. However, it does require installing JS tools and running them. IMHO Tailwind also went a bit [overboard with some things](https://tailwindcss.com/docs/adding-custom-styles#using-arbitrary-values), which it kinda had to because it is limited to what can be actual CSS classnames inside a `class` HTML attribute. `shadow-css` is much more flexible, so most of that is not required or supported.
 
 ## Goals
 
@@ -229,11 +229,9 @@ It suffers none of the known issues that other systems, which build CSS at runti
 <a name="build"></a>
 # Building CSS
 
-All of this is subject to change. Currently, the only way to build the CSS is by writing some Clojure code. This is very rough but it works fine.
+All of this is subject to change. Currently, the only way to build the CSS is by writing a Clojure function.
 
-I'd suggest using a new namespace since the `shadow.css.build` namespace is not needed at runtime and should not be part of your regular builds.
-
-## Release Builds
+I'd suggest using a new namespace since the `shadow.css.build` namespace is not needed at runtime and should not be part of your regular builds. It integrates nicely with `tools.build` if you are using that.
 
 ```clojure
 (ns build
@@ -247,87 +245,79 @@ I'd suggest using a new namespace since the `shadow.css.build` namespace is not 
             (cb/index-path (io/file "src" "main") {})
             (cb/generate
               '{:ui
-                {:include
-                 [my.app*]}})
+                {:entries [my.app]}})
+            (cb/minify)
             (cb/write-outputs-to (io/file "public" "css")))]
 
     (doseq [mod (:outputs build-state)
             {:keys [warning-type] :as warning} (:warnings mod)]
-
       (prn [:CSS (name warning-type) (dissoc warning :warning-type)]))))
 ```
 
-`(cb/start)` creates the initial build state and creates all the default aliases. `cb/index-path` finds all `.clj`, `.cljs`, `.cljc` files and extracts `(css ...)` forms from it. The `cb/generate` generates the CSS according to the configuration passed into it. Currently, this only takes `:include` which specifies a list of namespace symbols to generate CSS for. They may use a `*` wildcard at the end to include all namespaces matching that. `cb/write-outputs-to` writes the actual `.css` files to the supplied dir. It generates a `public/css/ui.css` in this case.
+- `(cb/start)` creates the initial build state and creates all the default aliases.
+- `cb/index-path` finds all `.clj`, `.cljs`, `.cljc` files in the specified directory and extracts `(css ...)` forms from it. You can call this multiple times if you have additional directories that should be indexed.
+- The `cb/generate` generates the CSS according to the configuration passed into it. `:entries` takes a vector of namespaces, which similar to `shadow-cljs` builds will be followed and all required namespaces with css forms will be included.
+- `cb/minify` strips all comments and whitespace from the generated outputs.
+- `cb/write-outputs-to` writes the actual `.css` files to the supplied dir. It generates a `public/css/ui.css` in this case.
+- The `doseq` is for printing warnings (e.g. missing aliases). A bit rough but works for now.
 
-The `doseq` is for printing warnings (eg. missing aliases), also rough but works for now.
+You may run this from the REPL, `lein run -m build/css-release`, `shadow-cljs run build/css-release` or `clj -X build/css-release`
 
-You may run this from the REPL, `lein run -m build/css-release`, `shadow-cljs run build/css-release` or `clj -X build/css-release` (additional aliases may be necessary).
+`build-state` is just a map, which contains everything interesting about the build.  Feel free to explore, e.g. via `tap>` in the shadow-cljs Inspect UI. It can become fairly large, but it is pretty self-explanatory.
 
-## Development Builds
+Custom aliases or other things can be added before `generate` is called. Adding or overriding an alias is just `(assoc-in build-state [:aliases :px-4] {:color "green"})`.
 
-The above works totally fine but is a bit manual. During development I prefer to just have something watching my source files and automatically rebuilding my CSS on change. This coupled with the hot-reload for CSS provided by `shadow-cljs`  (or `figwheel`) makes for a very nice workflow.
+## Development Setup
 
-Currently, the `shadow.css.build` namespace has nothing to provide this. I use this basic construct to integrate the CSS building into my regular REPL workflow. This is using the `fs-watch` utility provided by `shadow-cljs`, but any file watcher will do.
+The above works totally fine, but is a bit manual. During development I prefer to just have something watching my source files and automatically rebuilding my CSS on change. This coupled with the hot-reload for CSS provided by `shadow-cljs`  (or `figwheel`) makes for a very nice workflow.
+
+I use this basic construct to integrate the CSS building into my regular REPL workflow. This is using the `fs-watch` utility provided by `shadow-cljs`, but any file watcher will do. Since I use shadow-cljs anyway, I just start my work by using the [run feature](https://shadow-cljs.github.io/docs/UsersGuide.html#clj-run):
+
+```
+npx shadow-cljs run repl/start
+```
+
+That'll start `shadow-cljs` and CSS building starts with it. You can start CLJS builds from the `start` function as shown, so this basically replaces the normal `npx shadow-cljs watch your-build`
 
 ```clojure
 (ns repl
   (:require
     [clojure.java.io :as io]
-    [shadow.css.build :as cb]
+    [build]
+    [shadow.cljs.devtools.api :as shadow]
     [shadow.cljs.devtools.server.fs-watch :as fs-watch]))
 
-(defonce css-ref (atom nil))
 (defonce css-watch-ref (atom nil))
-
-(defn generate-css []
-  (let [result
-        (-> @css-ref
-            (cb/generate '{:ui {:include [my.app*]}})
-            (cb/write-outputs-to (io/file "public" "css")))]
-
-    (prn :CSS-GENERATED)
-    (doseq [mod (:outputs result)
-            {:keys [warning-type] :as warning} (:warnings mod)]
-      (prn [:CSS (name warning-type) (dissoc warning :warning-type)]))
-    (println)))
 
 (defn start
   {:shadow/requires-server true}
   []
-  
-  ;; first initialize my css
-  (reset! css-ref
-    (-> (cb/start)
-        (cb/index-path (io/file "src" "main") {})))
 
-  ;; then build it once
-  (generate-css)
+  ;; this is optional
+  ;; if using shadow-cljs you can start a watch from here
+  ;; same as running `shadow-cljs watch your-build` from the command line
+  (shadow/watch :your-build)
+  
+  ;; build css once on start
+  (build/css-release)
 
   ;; then setup the watcher that rebuilds everything on change
   (reset! css-watch-ref
     (fs-watch/start
       {}
-      [(io/file "src" "main")
-       (io/file "src" "dev")]
+      [(io/file "src" "main")]
       ["cljs" "cljc" "clj"]
-      (fn [updates]
+      (fn [_]
         (try
-          (doseq [{:keys [file event]} updates
-                  :when (not= event :del)]
-            ;; re-index all added or modified files
-            (swap! css-ref cb/index-file file))
-
-          (generate-css)
+          (build/css-release)
           (catch Exception e
-            (prn :css-build-failure)
-            (prn e))))))
+            (prn [:css-failed e]))))))
 
   ::started)
 
 (defn stop []
   (when-some [css-watch @css-watch-ref]
-    (fs-watch/stop css-watch)
-    (reset! css-ref nil))
+    (fs-watch/stop css-watch))
 
   ::stopped)
 
@@ -336,13 +326,9 @@ Currently, the `shadow.css.build` namespace has nothing to provide this. I use t
   (start))
 ```
 
-In the REPL I can run `(repl/start)` to start the automatic building and `(repl/stop)` to stop it. If you are used to the common CLJ REPL workflow setups this should fit right in.
+If you are used to the common CLJ REPL workflow setups this should fit right in. You can modify this to fit your needs.
 
-Since I also run `shadow-cljs` I usually start my work by running `npx shadow-cljs run repl/start`. That'll start `shadow-cljs` and CSS building starts with it. You could start CLJS builds from the `start` function too, I just do that via the shadow-cljs UI.
-
-Note that all of this could just call `(build/css-release)`. It absolutely does not need to do all of this extra stuff, but it is a bit faster since it does less on each file change. Creating the initial build state and indexing all files is more expensive than just incrementally updating changed namespaces.
-
-For the interested the build state is just a map, you can modify it however you like. Adding or overriding an alias is just `(assoc-in build-state [:aliases :px-4] {:color "green"})`. Feel free to explore, eg. via `tap>` in the shadow-cljs Inspect UI.
+It is possible to set up the development builds in a more efficient way. For me this has not been necessary given that most builds complete within ~100ms. If your development builds are becoming slow let me know, I can provide a more detailed guide on how to potentially make it faster.
 
 <a name="limits"></a>
 # Known Limitations / Trade-Offs
@@ -351,7 +337,7 @@ For the interested the build state is just a map, you can modify it however you 
 
 I don't think this is actually a problem, but might be for some REPL-heavy workflows.
 
-All CSS is built from actual files on disk. It cannot possibly see what you do at the REPL. Remember this does almost nothing at runtime. Everything you write and load from disk works just fine (eg. `require` and `load-file`) but evaluating individual forms may become a problem. You may of course evaluate `(css ...)` forms at the REPL, they'll however be somewhat useless since no actual CSS is generated. Not that any REPL needs CSS anyways.
+All CSS is built from actual files on disk. It cannot possibly see what you do at the REPL. Remember this does almost nothing at runtime. Everything you write and load from disk works just fine (eg. `require` and `load-file`) but evaluating individual forms may become a problem. You may of course evaluate `(css ...)` forms at the REPL, they'll however be somewhat useless since no actual CSS is generated. Not that any REPL needs CSS anyway.
 
 ```
 (require '[shadow.css :refer (css)])
@@ -367,7 +353,7 @@ The problem shows itself when you put something in a file but then redefine it a
   (html [:div {:class (css :px-4)} "Hello World"]))
 ```
 
-change something and re-define it at the REPL, without saving the file to disk. The location of the `(css` form may have changed and therefore generated classname no longer matches. When the HTML is loaded it'll point to a classname that doesn't exist and the element may appear unstyled.
+change something and re-define it at the REPL, without saving the file to disk. The location of the `(css` form may have changed and therefore generated classname no longer matches. When the HTML is loaded it'll point to a classname that does not exist and the element may appear unstyled.
 
 Again, I don't believe this to be a problem, and is a trade-off I'm willing to make either way.
 
