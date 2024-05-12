@@ -91,11 +91,18 @@
       (emitln w "  " (name prop) ": " (get group-rules prop) ";"))
     (emitln w "}")))
 
+(defn emit-meta-comments
+  "Within a single comment, output a list of namespaces, line and column numbers
+  for a given set of rules."
+  [w rules]
+  (emitln w (str "/*\n"
+                 (str/join "\n"
+                           (for [{:keys [ns line column]} rules]
+                             (str ns " " line ":" column )))
+                 "\n*/")))
+
 (defn emit-def [w {:keys [sel rules at-rules ns line column rules] :as def}]
-  ;; (emitln w (str "/* " ns " " line ":" column " */"))
-
   (emit-rule w sel rules)
-
   (doseq [[media-query rules] at-rules]
     (emitln w media-query "{")
     (emit-rule w sel rules)
@@ -115,8 +122,12 @@
               [(doseq [inc classpath-includes]
                  (emitln sw (slurp (io/resource inc))))])
 
-          (doseq [def rules]
-            (emit-def sw def))
+          (doseq [[_ def-rules] (group-by :css-id rules)]
+            ;; emit comments for all of the rules
+            (emit-meta-comments sw def-rules)
+            ;; but we only need to emit the first actual def
+            (emit-def sw (first def-rules)))
+
           (.toString sw))))))
 
 (defn collect-namespaces-for-chunk
@@ -191,8 +202,8 @@
       (let [all-rules
             (->> (for [ns (:chunk-namespaces chunk)
                        :let [{:keys [ns css] :as ns-info} (get namespaces ns)]
-                       {:keys [line column] :as form-info} css
-                       :let [css-id (s/generate-id ns line column)]]
+                       {:keys [form] :as form-info} css
+                       :let [css-id (s/generate-id form)]]
                    (-> (ana/process-form build-state form-info)
                        (assoc
                          :ns ns

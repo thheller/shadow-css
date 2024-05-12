@@ -37,7 +37,7 @@
         ;; but may end up emitting invalid references in code
         ;; which again is fine in JS since it'll just be undefined
         css-id
-        (s/generate-id ns-str line column)
+        (s/generate-id (vec body))
 
         passthrough
         (->> body
