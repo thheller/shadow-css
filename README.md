@@ -258,11 +258,20 @@ I'd suggest using a new namespace since the `shadow.css.build` namespace is not 
       (prn [:CSS (name warning-type) (dissoc warning :warning-type)]))))
 ```
 
-- `(cb/start)` creates the initial build state and creates all the default aliases.
-- `cb/index-path` finds all `.clj`, `.cljs`, `.cljc` files in the specified directory and extracts `(css ...)` forms from it. You can call this multiple times if you have additional directories that should be indexed.
-- The `cb/generate` generates the CSS according to the configuration passed into it. `:entries` takes a vector of namespaces, which similar to `shadow-cljs` builds will be followed and all required namespaces with css forms will be included.
+Here is a breakdown of what all this does:
+
+- `(cb/start)` creates the initial build state and creates all the default aliases. It returns a map representing the build state. Basically each subsequent steps modifies this map or generates .css files from it.
+
+- `(cb/index-path (io/file "src" "main"))` finds all `.clj`, `.cljs`, `.cljc` files in the specified `src/main` directory and extracts `(css ...)` forms from it. You can call this multiple times if you have additional directories that should be indexed.
+
+- The `cb/generate` configures the basic build structure
+
+CSS output is configured in "chunks". Basically think of the entire build as producing one `.css` file. It may sometimes be more desirable to split that file into smaller chunks when needed. This example only has one, here the `:ui` chunk will later create the `ui.css` file. Don't worry about splitting too much, it is often not necessary.
+
+The generator needs to know which CSS should go into which chunk. For this `shadow-css` uses the namespace structure from your code. The `:entries [my.app]` option means, that it will take your `my.app` namespace, include all CSS found in the file for that namespace, and then also follow all the required namespaces from `my.app` to also include those and follow them as well. Assuming `my.app` actually required all your namespaces (directly or indirectly), then this would be enough to create CSS for all your files. You may add additional namespaces into the `:entries` vector. You may also replace the `:entries` option with `:include [my.app*]` instead, which will end up including all namespaces with the `my.app` prefix, in addition to their dependencies.
+
 - `cb/minify` strips all comments and whitespace from the generated outputs.
-- `cb/write-outputs-to` writes the actual `.css` files to the supplied dir. It generates a `public/css/ui.css` in this case.
+- `cb/write-outputs-to` writes the actual `.css` files to the supplied dir. For the `:ui` chunk it generates a `public/css/ui.css` in this case.
 - The `doseq` is for printing warnings (e.g. missing aliases). A bit rough but works for now.
 
 You may run this from the REPL, `lein run -m build/css-release`, `shadow-cljs run build/css-release` or `clj -X build/css-release`
