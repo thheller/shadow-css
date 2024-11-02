@@ -276,10 +276,14 @@ The generator needs to know which CSS should go into which chunk. For this `shad
 ### Chunk :include
 You may also use the `:include [my.app*]` instead, or in addition to `:entries`. This will end up including all namespaces with the `my.app` prefix, but does not follow any other required namespaces. You may also add multiple patterns into this vector. A `*` at the end is used for a wildcard prefix match, the `*` may only be at the end for now. You may also just put a regular namespace here like `:include [my.app]`, which will only include the CSS for that namespace and nothing else.
 
+
+### Next steps
+
 - `cb/minify` strips all comments and whitespace from the generated outputs.
 - `cb/write-outputs-to` writes the actual `.css` files to the supplied dir. For the `:ui` chunk it generates a `public/css/ui.css` in this case.
 - The `doseq` is for printing warnings (e.g. missing aliases). A bit rough but works for now.
 
+At this point the build is done, files were written to disk and the build state can be discarded.
 
 ### Custom CSS aliases
 
