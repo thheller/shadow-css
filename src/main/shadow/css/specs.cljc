@@ -1,6 +1,7 @@
 (ns shadow.css.specs
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.walk :refer [postwalk]]))
 
 (s/def ::alias keyword?)
 
@@ -94,11 +95,21 @@
       {:parts [] :invalid true :body body :spec (s/explain-data ::class-def body)}
       conformed)))
 
-(defn generate-id [ns line column]
-  (str (-> (str ns)
-           (str/replace #"\." "_")
-           (munge))
-       "__"
-       "L" line
-       "_"
-       "C" column))
+(defn generate-id
+  "Generates a class name which is unique given the contents. Will account for
+  different ordering within the subqueries."
+  [rules]
+  (str "sc-" (postwalk
+              (fn [rule]
+                (cond
+                  ;; postwalk will give you a vector pair for a map before it
+                  ;; gives you the actual map
+                  (map-entry? rule)
+                  rule
+
+                  (vector? rule)
+                  (hash (sort rule))
+
+                  :else
+                  (hash rule)))
+              rules)))
