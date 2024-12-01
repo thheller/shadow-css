@@ -95,28 +95,36 @@
     (not (string? group-sel))
     (add-warning svc form ::invalid-group-sel {:sel group-sel})
 
-    ;; media queries
-    (str/starts-with? group-sel "@media")
-    (let [{:keys [rules media]} form
+    ;; at block rules such as @media or @starting-style
+    (str/starts-with? group-sel "@")
+    (let [{:keys [rules block]} form
 
-          new-media
-          (if-not (seq media)
-            group-sel
+          ;; FIXME: add back support for combining media queries?
+          ;; I generalized this so @starting-style works but removed @media "and" combining, so this may now nest media queries
+          ;; this is fine, but looks a bit prettier when combined. don't think its a common occurence to start, so no bothering for now
 
-            ;; attempt to combine media queries via and
-            ;; FIXME: can all @media queries combined like this?
-            ;;   @media (min-width: 300) @media print
-            ;; combined to
-            ;;   @media (min-width: 300) and print
-            ;; so there is only one media rule and no nesting?
-            (str media " and " (subs group-sel 7)))]
+          ;; FIXME: @starting-style can be nested inside the main selector, maybe that should be its own special case?
+
+          ;; @starting-style {
+          ;;   .foo { ... }
+          ;; }
+
+          ;; vs
+
+          ;; .foo {
+          ;;   @starting-style {
+          ;;     ...
+          ;;   }}
+
+          new-block
+          (conj block group-sel)]
 
       (-> form
-          (assoc :rules {} :media new-media)
+          (assoc :rules {} :block new-block)
           (reduce-> #(add-part svc %1 %2) group-parts)
           ((fn [{:keys [rules] :as form}]
-             (assoc-in form [:at-rules new-media] rules)))
-          (assoc :rules rules :media media)))
+             (assoc-in form [:at-rules new-block] rules)))
+          (assoc :rules rules :block block)))
 
     (str/index-of group-sel "&")
     (let [{:keys [rules sel]} form]
@@ -157,9 +165,9 @@
 
 (defn process-form [svc {:keys [form] :as form-info}]
   (-> form-info
-      (assoc :sel "&" :media nil :rules {} :at-rules {} :warnings [])
+      (assoc :sel "&" :block [] :rules {} :at-rules {} :warnings [])
       (reduce-> #(add-part svc %1 %2) form)
-      (dissoc :stack :sel :media)))
+      (dissoc :stack :sel :block)))
 
 (defn flatten-prefix-lists [form]
   (let [prefix-parts (take-while #(not (keyword? %)) form)

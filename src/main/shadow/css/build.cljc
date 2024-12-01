@@ -96,10 +96,13 @@
 
   (emit-rule w sel rules)
 
-  (doseq [[media-query rules] at-rules]
-    (emitln w media-query "{")
+  (doseq [[nesting rules] at-rules]
+
+    (doseq [lvl nesting]
+      (emitln w lvl " {"))
     (emit-rule w sel rules)
-    (emitln w "}")))
+    (doseq [_ nesting]
+      (emitln w "}"))))
 
 (defn build-css-for-chunk [build-state chunk-id]
   (update-in build-state [:chunks chunk-id]
