@@ -316,6 +316,8 @@
     {"bg-" :background-color
      "border-" :border-color
      "outline-" :outline-color
+     "stroke-" :stroke
+     "fill-" :fill
      "text-" :color
      "divide-"
      (fn [color]
