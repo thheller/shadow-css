@@ -116,7 +116,11 @@
 
           #?@(:clj
               [(doseq [inc classpath-includes]
-                 (emitln sw (slurp (io/resource inc))))])
+                 (if-some [include (io/resource inc)]
+                   (emitln sw (slurp include))
+                   (.println
+                    System/err
+                    (format "[ERROR] shadow.css.build - Couldn't find :shadow.css/include %s " inc))))])
 
           (doseq [def rules]
             (emit-def sw def))
