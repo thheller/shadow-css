@@ -208,7 +208,12 @@
             (into #{} (for [ns (:chunk-namespaces chunk)
                             :let [{:keys [ns-meta]} (get namespaces ns)]
                             include (:shadow.css/include ns-meta)]
-                        include))
+                        (do (when-not (io/resource include)
+                              (throw (ex-info
+                                       (str "css include \"" include "\" could not be found on the classpath, it was included in namespace " ns)
+                                       {:ns ns
+                                        :include include})))
+                            include)))
 
             warnings
             (vec
