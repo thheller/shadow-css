@@ -118,9 +118,12 @@
               [(doseq [inc classpath-includes]
                  (if-some [include (io/resource inc)]
                    (emitln sw (slurp include))
-                   (.println
-                    System/err
-                    (format "[ERROR] shadow.css.build - Couldn't find :shadow.css/include %s " inc))))])
+                   (let [message (format "Couldn't find :shadow.css/include %s " inc)]
+                     (throw
+                       (ex-info
+                         message
+                         {:classpath-includes classpath-includes
+                          :include inc})))))])
 
           (doseq [def rules]
             (emit-def sw def))
