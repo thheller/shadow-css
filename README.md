@@ -253,7 +253,7 @@ I'd suggest using a new namespace since the `shadow.css.build` namespace is not 
             (cb/minify)
             (cb/write-outputs-to (io/file "public" "css")))]
 
-    (doseq [mod (:outputs build-state)
+    (doseq [mod (vals (:chunks build-state))
             {:keys [warning-type] :as warning} (:warnings mod)]
       (prn [:CSS (name warning-type) (dissoc warning :warning-type)]))))
 ```
