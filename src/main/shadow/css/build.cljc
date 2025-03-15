@@ -231,6 +231,33 @@
     build-state
     (:chunks build-state)))
 
+(defn build-hiccup-sugar [{:keys [namespaces base-chunk aliases] :as build-state}]
+  ;; FIXME: this could be optimized to emit to do this per chunk
+  ;; but for now keeping everything in the base chunk
+  (let [hiccup-classes
+        (into #{}
+          (for [chunk (vals (:chunks build-state))
+                ns (:chunk-namespaces chunk)
+                class (get-in namespaces [ns :hiccup-classes])]
+            class))
+
+        hiccup-css
+        (let [sw #?(:clj (StringWriter.) :cljs (StringBuffer.))]
+          (doseq [class hiccup-classes
+                  :let [hiccup-kw (keyword class)
+                        rules (get aliases hiccup-kw)]
+                  :when rules]
+
+            (let [def (-> {:sel "&" :block [] :rules {} :at-rules {} :warnings []}
+                          (ana/reduce-> #(ana/add-part build-state %1 %2) [hiccup-kw])
+                          (assoc :sel (str "." class)))]
+              (emit-def sw def)))
+          (.toString sw))]
+
+    (-> build-state
+        (assoc :hiccup-classes hiccup-classes :hiccup-css hiccup-css)
+        (update-in [:chunks base-chunk :css] str "\n" hiccup-css))))
+
 (defn trim-chunks [build-state]
   (update build-state :chunks
     (fn [chunks]
@@ -260,18 +287,28 @@
       (assoc :chunks {})
       (ana/reduce-kv->
         (fn [build-state chunk-id chunk]
-          (let [chunk
+          (let [base?
+                (not (contains? chunk :depends-on))
+
+                chunk
                 (-> chunk
                     (assoc :chunk-id chunk-id)
                     (cond->
-                      (not (contains? chunk :depends-on))
+                      base?
                       (assoc :base true))
                     (collect-namespaces-for-chunk build-state))]
 
-            (assoc-in build-state [:chunks chunk-id] chunk)))
+            (-> build-state
+                (assoc-in [:chunks chunk-id] chunk)
+                (cond->
+                  base?
+                  (assoc :base-chunk chunk-id)))))
         chunks)
       (trim-chunks)
-      (build-css-for-chunks)))
+      (build-css-for-chunks)
+      (cond->
+        (:hiccup-sugar build-state)
+        (build-hiccup-sugar))))
 
 ;; simplistic regexp based css minifier
 ;; it'll destroy some stuff for sure
@@ -302,7 +339,7 @@
 
 (defn index-source [build-state src]
   (let [{:keys [ns] :as contents}
-        (ana/find-css-in-source src)]
+        (ana/find-css-in-source build-state src)]
 
     (if (not contents)
       build-state

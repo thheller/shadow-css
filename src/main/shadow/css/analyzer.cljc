@@ -280,6 +280,19 @@
         (assoc :ns ns :ns-meta ns-meta)
         (reduce-> parse-ns-require-form ns-requires))))
 
+(defn parse-hiccup-kw [state kw]
+  (let [s (name kw)
+        start (str/index-of s ".")
+        s (subs s (inc start))
+        end (or (str/index-of s "#") (count s))
+        s (subs s 0 end)]
+
+    (update state :hiccup-classes into (str/split s #"\."))))
+
+(comment
+  (parse-hiccup-kw {:hiccup-classes #{}} :div#foo.bar.baz)
+  (parse-hiccup-kw {:hiccup-classes #{}} :div.foo.bar.baz#id))
+
 (defn find-css-calls [state form]
   (cond
     (map? form)
@@ -311,6 +324,17 @@
       ;; any other list
       (reduce find-css-calls state form))
 
+    ;; potential hiccup vector
+    (vector? form)
+    (let [kw (first form)]
+      (if (and (simple-keyword? kw) (str/index-of (name kw) "."))
+        (-> state
+            (parse-hiccup-kw kw)
+            (reduce-> find-css-calls form))
+
+        ;; vector not starting with keyword
+        (reduce find-css-calls state form)))
+
     ;; sets, vectors
     (coll? form)
     (reduce find-css-calls state form)
@@ -318,8 +342,9 @@
     :else
     state))
 
-(defn find-css-in-source [src]
+(defn find-css-in-source [{:keys [hiccup-sugar] :as build-state} src]
   ;; shortcut if src doesn't contain any css, faster than parsing all forms
+  ;; still need to parse whole file when in hiccup-sugar mode, as there may not be any (css ...) uses
   (let [has-css? (str/index-of src "(css")
         reader (reader-types/source-logging-push-back-reader src)
         eof #?(:clj (Object.) :cljs (js-obj))]
@@ -330,7 +355,8 @@
             :ns nil
             :ns-meta {}
             :require-aliases {}
-            :requires []}]
+            :requires []
+            :hiccup-classes #{}}]
 
       (let [form
             (binding
@@ -361,7 +387,7 @@
               ;; do not continue without ns form being first, just don't look for css
               next-state
 
-              (not has-css?)
+              (and (not has-css?) (not hiccup-sugar))
               next-state
 
               :else
