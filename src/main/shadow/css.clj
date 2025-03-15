@@ -27,6 +27,9 @@
         ns-str
         (str *ns*)
 
+        ns-meta
+        (meta *ns*)
+
         ;; this must generate a unique identifier right here
         ;; using only information that can be taken from the css form
         ;; itself. It must not look at any other location and the id
@@ -37,7 +40,7 @@
         ;; but may end up emitting invalid references in code
         ;; which again is fine in JS since it'll just be undefined
         css-id
-        (s/generate-id ns-str line column)
+        (s/generate-id ns-str ns-meta line column)
 
         passthrough
         (->> body

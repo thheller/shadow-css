@@ -94,10 +94,11 @@
       {:parts [] :invalid true :body body :spec (s/explain-data ::class-def body)}
       conformed)))
 
-(defn generate-id [ns line column]
-  (str (-> (str ns)
-           (str/replace #"\." "_")
-           (munge))
+(defn generate-id [ns ns-meta line column]
+  (str (or (:shadow.css/alias ns-meta)
+           (-> (str ns)
+               (str/replace #"\." "_")
+               (munge)))
        "__"
        "L" line
        "_"
