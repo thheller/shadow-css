@@ -363,7 +363,7 @@
 
  ;; box sizing
  :box-border {:box-sizing "border-box"}
- :box-content {:box-sizing "box-content"}
+ :box-content {:box-sizing "content-box"}
 
  ;; outline
  :outline {:outline-style "solid"}
