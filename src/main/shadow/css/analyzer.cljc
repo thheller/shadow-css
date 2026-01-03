@@ -14,6 +14,25 @@
 (defn lookup-alias [svc alias-kw]
   (get-in svc [:aliases alias-kw]))
 
+(defn dynamic-alias [svc alias-kw]
+  ;; tries to find things like :mt-48px as a shorthand for {:margin-top "48px"}
+  ;; FIXME: are those all the CSS units? sure I missed some
+  ;; uses the :spacing map from the build/init to find what mt- stands for
+  ;; and turns :mx-48px into {:margin-left "48px" :margin-right "48px"}
+  (when-some [[_ prefix num unit :as m]
+              (re-find #"(.+-)(\d*\.?\d+)(px|em|rem|%|vh|vw)$" (name alias-kw))]
+    (when-some [alias-val (get-in svc [:spacing prefix])]
+      (reduce
+        (fn [m key]
+          (assoc m key (str (when (str/starts-with? prefix "-") "-") num unit)))
+        {}
+        alias-val))))
+
+(comment
+  (dynamic-alias
+    {:spacing {"mx-" [:margin-left :margin-right]}}
+    :mx-48px))
+
 (def plain-numeric-props
   #{:flex :order :flex-shrink :flex-grow :z-index :opacity})
 
@@ -32,7 +51,9 @@
 (declare add-part)
 
 (defn add-alias [svc form alias-kw]
-  (let [alias-val (lookup-alias svc alias-kw)]
+  (let [alias-val
+        (or (lookup-alias svc alias-kw)
+            (dynamic-alias svc alias-kw))]
     (cond
       (not alias-val)
       (add-warning svc form ::missing-alias {:alias alias-kw})
