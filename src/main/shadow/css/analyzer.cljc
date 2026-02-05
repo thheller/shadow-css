@@ -281,25 +281,33 @@
   (reduce parse-ns-require-part state parts))
 
 (defn parse-ns [state form]
-  (let [[_ ns maybe-meta]
+  (let [[_ ns & more]
         form
 
-        ;; FIXME: should this filter shadow.css/* already? don't really need other meta
         ns-meta
-        (merge
-          ;; don't care about the reader metadata, only added stuff
-          (dissoc (meta ns) :source :line :column :end-line :end-column)
-          (when (map? maybe-meta)
-            maybe-meta))
-
-        ns-requires
-        (->> form
-             (drop 2)
-             (filter #(and (list? %) (= :require (first %)))))]
+        (dissoc (meta ns) :source :line :column :end-line :end-column)]
 
     (-> state
         (assoc :ns ns :ns-meta ns-meta)
-        (reduce-> parse-ns-require-form ns-requires))))
+        (reduce->
+          (fn [state ns-part]
+            (cond
+              ;; FIXME: this could be stricter and respect ordering
+              ;; but I'll assume ns forms are correct and its not our job to verify
+              ;; just need the metadata for :shadow.css/include, so keeping everything isn't really needed
+              (string? ns-part)
+              (assoc-in state [:ns-meta :doc] ns-part)
+
+              (map? ns-part)
+              (update state :ns-meta merge ns-part)
+
+              (and (list? ns-part) (= :require (first ns-part)))
+              (parse-ns-require-form state ns-part)
+
+              ;; don't care about :import or other clauses
+              :else
+              state))
+          more))))
 
 (defn parse-hiccup-kw [state kw]
   (let [s (name kw)

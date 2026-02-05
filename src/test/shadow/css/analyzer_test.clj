@@ -88,7 +88,9 @@
 
         form
         '(ns ^{:foo "bar"} foo.bar
-           {:bar "foo"}
+           "docstring"
+           {:bar "foo"
+            :shadow.css/include ["foo.css"]}
            (:require
              just-a-sym
              [shadow.grove :refer (css << defc)]
