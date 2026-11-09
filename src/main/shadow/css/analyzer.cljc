@@ -21,7 +21,7 @@
   ;; and turns :mx-48px into {:margin-left "48px" :margin-right "48px"}
   (when-some [[_ prefix num unit :as m]
               (re-find #"(.+-)(\d*\.?\d+)(px|em|rem|%|vh|vw)$" (name alias-kw))]
-    (when-some [alias-val (get-in svc [:spacing prefix])]
+    (when-some [alias-val (get-in svc [:alias-groups :spacing prefix])]
       (reduce
         (fn [m key]
           (assoc m key (str (when (str/starts-with? prefix "-") "-") num unit)))
@@ -30,7 +30,7 @@
 
 (comment
   (dynamic-alias
-    {:spacing {"mx-" [:margin-left :margin-right]}}
+    (shadow.css.build/init)
     :mx-48px))
 
 (def plain-numeric-props
