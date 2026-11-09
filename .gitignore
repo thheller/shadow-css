@@ -12,5 +12,6 @@ pom.xml.asc
 /.nrepl-port
 /.prepl-port
 /.idea
+/.shadow-cljs
 .hgignore
 .hg/

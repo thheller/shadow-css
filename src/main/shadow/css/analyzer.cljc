@@ -39,11 +39,16 @@
 (defn convert-num-val [index prop num]
   (if (contains? plain-numeric-props prop)
     (str num)
-    (or (get-in index [:svc :spacing num])
+    (or (get-in index [:spacing num])
         (throw
           (ex-info
             (str "invalid numeric value for prop " prop)
             {:prop prop :num num})))))
+
+(comment
+  (convert-num-val
+    (shadow.css.build/init)
+    :padding 4))
 
 (defn add-warning [svc form warning-type warning-vals]
   (update form :warnings conj (assoc warning-vals :warning-type warning-type)))
